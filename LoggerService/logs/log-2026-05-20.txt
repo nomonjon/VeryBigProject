@@ -1,0 +1,3 @@
+﻿2026-05-20T12:02:02.4189497Z [Information] (27373639de03) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/WorkTask" ""
+2026-05-20T12:02:02.6174071Z [Information] (27373639de03) TaskTracker.Services.WorkTaskService - Retrieved 1 work tasks
+2026-05-20T12:02:02.6408513Z [Information] (27373639de03) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/WorkTask" => 200 in 223ms

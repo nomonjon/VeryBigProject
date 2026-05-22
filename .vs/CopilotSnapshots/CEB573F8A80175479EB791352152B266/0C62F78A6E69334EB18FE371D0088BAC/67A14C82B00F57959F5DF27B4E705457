@@ -1,0 +1,15 @@
+﻿{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "JwtSettings": {
+    "SecretKey": "your-super-secret-key-that-is-long-enough-for-256-bit-security",
+    "Issuer": "TaskTracker",
+    "Audience": "TaskTrackerUsers",
+    "ExpiresInMinutes": 60
+  }
+}

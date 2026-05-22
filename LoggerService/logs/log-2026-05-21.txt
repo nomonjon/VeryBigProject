@@ -1,0 +1,68 @@
+﻿2026-05-21T07:17:23.2047510Z [Warning] (7789636d6b0e) Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager - No XML encryptor configured. Key {ae133dfe-6922-4b72-8332-b4a60a60e8a1} may be persisted to storage in unencrypted form.
+2026-05-21T07:52:43.3178549Z [Warning] (949022cb28c0) Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository - Storing keys in a directory '"/home/app/.aspnet/DataProtection-Keys"' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T07:52:43.3600706Z [Warning] (949022cb28c0) Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager - No XML encryptor configured. Key {ece14b2f-36a6-49c1-9e04-7ca4a2366a1c} may be persisted to storage in unencrypted form.
+2026-05-21T07:53:13.0228420Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/WorkTask/WithId" ""
+2026-05-21T07:53:13.0754238Z [Information] (949022cb28c0) TaskTracker.Services.WorkTaskService - Retrieved work tasks
+2026-05-21T07:53:13.3445830Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/WorkTask/WithId" => 200 in 330ms
+2026-05-21T07:54:15.3402144Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "PUT" "/api/WorkTask/543daf2b-1749-4dfc-966c-e7664a705ffd" ""
+2026-05-21T07:54:15.5419841Z [Warning] (949022cb28c0) TaskTracker.Services.WorkTaskService - Project not found for work task update. ProjectId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+2026-05-21T07:54:15.5485447Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "PUT" "/api/WorkTask/543daf2b-1749-4dfc-966c-e7664a705ffd" => 404 in 208ms
+2026-05-21T07:54:53.0927868Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "PUT" "/api/WorkTask/543daf2b-1749-4dfc-966c-e7664a705ffd" ""
+2026-05-21T07:54:53.3238914Z [Information] (949022cb28c0) TaskTracker.Services.WorkTaskService - Task 543daf2b-1749-4dfc-966c-e7664a705ffd status changed: InProgress → Done
+2026-05-21T07:54:53.3272013Z [Information] (949022cb28c0) TaskTracker.Services.WorkTaskService - Successfully updated work task with ID: 543daf2b-1749-4dfc-966c-e7664a705ffd
+2026-05-21T07:54:53.3342484Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "PUT" "/api/WorkTask/543daf2b-1749-4dfc-966c-e7664a705ffd" => 200 in 241ms
+2026-05-21T08:00:32.7034204Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/User/withId" ""
+2026-05-21T08:00:32.7400063Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/User/withId" => 200 in 36ms
+2026-05-21T08:01:06.4811047Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "POST" "/api/Auth/login" ""
+2026-05-21T08:01:06.8509430Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "POST" "/api/Auth/login" => 200 in 369ms
+2026-05-21T08:01:36.5090440Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/Project/withId" ""
+2026-05-21T08:01:36.5629836Z [Information] (949022cb28c0) TaskTracker.Services.ProjectService - Retrieved 2 projects with IDs
+2026-05-21T08:01:36.5667679Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/Project/withId" => 200 in 57ms
+2026-05-21T08:01:46.8469041Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/Project" ""
+2026-05-21T08:01:46.8690038Z [Information] (949022cb28c0) TaskTracker.Services.ProjectService - Retrieved 2 projects
+2026-05-21T08:01:46.8761606Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/Project" => 200 in 29ms
+2026-05-21T08:03:56.7608653Z [Warning] (949022cb28c0) Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository - Storing keys in a directory '"/home/app/.aspnet/DataProtection-Keys"' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T08:04:54.5373445Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/Project" ""
+2026-05-21T08:04:54.8459595Z [Information] (949022cb28c0) TaskTracker.Services.ProjectService - Retrieved 2 projects
+2026-05-21T08:04:54.8789242Z [Information] (949022cb28c0) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/Project" => 200 in 344ms
+2026-05-21T07:17:23.1746917Z [Warning] (7789636d6b0e) Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository - Storing keys in a directory '"/home/app/.aspnet/DataProtection-Keys"' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T08:11:50.2583861Z [Warning] (5a94017faa6c) Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository - Storing keys in a directory '"/home/app/.aspnet/DataProtection-Keys"' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T07:17:23.2047510Z [Warning] (7789636d6b0e) Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager - No XML encryptor configured. Key {ae133dfe-6922-4b72-8332-b4a60a60e8a1} may be persisted to storage in unencrypted form.
+ontainer. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T08:12:14.6476210Z [Warning] (5a94017faa6c) Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository - Storing keys in a directory '"/home/app/.aspnet/DataProtection-Keys"' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T08:13:17.4780134Z [Information] (5a94017faa6c) TaskTracker.Services.ProjectService - Retrieved 2 projects
+2026-05-21T07:17:23.1746917Z [Warning] (7789636d6b0e) Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository - Storing keys in a directory '"/home/app/.aspnet/DataProtection-Keys"' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T08:12:14.6476210Z [Warning] (5a94017faa6c) Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository - Storing keys in a directory '"/home/app/.aspnet/DataProtection-Keys"' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T08:13:17.4780134Z [Information] (5a94017faa6c) TaskTracker.Services.ProjectService - Retrieved 2 projects
+2026-05-21T08:13:17.5140989Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/Project" => 200 in 268ms
+2026-05-21T08:13:19.3194249Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/Project" ""
+2026-05-21T08:13:19.3647709Z [Information] (5a94017faa6c) TaskTracker.Services.ProjectService - Retrieved 2 projects
+2026-05-21T08:13:19.3675088Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/Project" => 200 in 48ms
+2026-05-21T08:55:36.4728798Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/Project" ""
+2026-05-21T08:55:36.5504972Z [Information] (5a94017faa6c) TaskTracker.Services.ProjectService - Retrieved 2 projects
+2026-05-21T08:55:36.5549930Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/Project" => 200 in 82ms
+2026-05-21T08:55:37.6165766Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/Project" ""
+2026-05-21T08:55:37.6256492Z [Information] (5a94017faa6c) TaskTracker.Services.ProjectService - Retrieved 2 projects
+2026-05-21T08:55:37.6290709Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/Project" => 200 in 12ms
+2026-05-21T09:07:26.3776404Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/WorkTask" ""
+2026-05-21T09:07:26.4445330Z [Information] (5a94017faa6c) TaskTracker.Services.WorkTaskService - Retrieved 1 work tasks
+2026-05-21T09:07:26.4531099Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/WorkTask" => 200 in 75ms
+2026-05-21T09:07:27.7358293Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/WorkTask" ""
+2026-05-21T09:07:27.7422732Z [Information] (5a94017faa6c) TaskTracker.Services.WorkTaskService - Retrieved 1 work tasks
+2026-05-21T09:07:27.7448999Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/WorkTask" => 200 in 9ms
+2026-05-21T09:08:05.1953135Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/WorkTask" ""
+2026-05-21T09:08:05.2060141Z [Information] (5a94017faa6c) TaskTracker.Services.WorkTaskService - Retrieved 1 work tasks
+2026-05-21T09:08:05.2108222Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/WorkTask" => 200 in 15ms
+2026-05-21T09:08:05.8651861Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/WorkTask" ""
+2026-05-21T09:08:05.8734315Z [Information] (5a94017faa6c) TaskTracker.Services.WorkTaskService - Retrieved 1 work tasks
+2026-05-21T09:08:05.8769026Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/WorkTask" => 200 in 11ms
+2026-05-21T09:09:01.5812550Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/WorkTask" ""
+2026-05-21T09:09:01.5876632Z [Information] (5a94017faa6c) TaskTracker.Services.WorkTaskService - Retrieved 1 work tasks
+2026-05-21T09:09:01.5902477Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/WorkTask" => 200 in 9ms
+2026-05-21T09:10:02.7629716Z [Warning] (5a94017faa6c) Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository - Storing keys in a directory '"/home/app/.aspnet/DataProtection-Keys"' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T09:10:10.1476121Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Incoming request: "GET" "/api/WorkTask" ""
+2026-05-21T09:10:10.3931526Z [Information] (5a94017faa6c) TaskTracker.Services.WorkTaskService - Retrieved 1 work tasks
+2026-05-21T09:10:10.4246104Z [Information] (5a94017faa6c) TaskTracker.Middlewares.RequestLoggingMiddleware - Completed "GET" "/api/WorkTask" => 200 in 279ms
+2026-05-21T07:17:23.2047510Z [Warning] (7789636d6b0e) Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager - No XML encryptor configured. Key {ae133dfe-6922-4b72-8332-b4a60a60e8a1} may be persisted to storage in unencrypted form.
+ontainer. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-21T10:34:15.3883830Z [Warning] (5a94017faa6c) Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository - Storing keys in a directory '"/home/app/.aspnet/DataProtection-Keys"' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning

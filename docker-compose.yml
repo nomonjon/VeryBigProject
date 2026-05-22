@@ -1,0 +1,155 @@
+name: tasktracker-solution
+
+services:
+
+  product:
+    networks:
+      - default
+      - shared_network
+    image: ${DOCKER_REGISTRY-}product
+    build:
+      context: .
+      dockerfile: GrpcServer/Dockerfile
+    environment:
+      - ASPNETCORE_HTTP_PORTS=5000
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+    ports:
+      - "5000:5000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  tasktracker:
+    networks:
+      - default
+      - shared_network
+    image: ${DOCKER_REGISTRY-}tasktracker
+    build:
+      context: .
+      dockerfile: TaskTracker/Dockerfile
+    environment:
+      - ASPNETCORE_HTTP_PORTS=5100
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+    ports:
+      - "5100:5100"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  notifier:
+    networks:
+      - default
+      - shared_network
+    image: ${DOCKER_REGISTRY-}notifier
+    build:
+      context: .
+      dockerfile: NotificationService/Dockerfile
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    networks:
+      - default
+      - shared_network
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  loggerservice:
+    networks:
+      - default
+      - shared_network
+    image: ${DOCKER_REGISTRY-}loggerservice
+    build:
+      context: .
+      dockerfile: LoggerService/Dockerfile
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+      - MongoDB__ConnectionString=mongodb://admin:admin@mongodb:27017
+      - MongoDB__DatabaseName=LogsDb
+    volumes:
+      - ./LoggerService/logs:/app/logs
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+
+  tasktracker.database:
+    networks:
+      - default
+    image: postgres:latest
+    container_name: tasktracker.database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: TaskTracker
+    ports:
+      - "5432:5432"
+
+  product.database:
+    networks:
+      - default
+    image: postgres:latest
+    container_name: product.database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: productdb
+    ports:
+      - "5431:5432"
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    networks:
+      - default
+      - shared_network
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+volumes:
+  rabbitmq_data:
+  logger_logs:
+  mongo_data:
+
+networks:
+  shared_network:
+    name: my-shared-network
+    driver: bridge

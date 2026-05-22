@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\intership\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{1781B1C9-6FB6-821C-1C8F-ADC55F55701D}|TaskTracker\\TaskTracker.csproj|d:\\intership\\tasktracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1781B1C9-6FB6-821C-1C8F-ADC55F55701D}|TaskTracker\\TaskTracker.csproj|solutionrelative:tasktracker\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1781B1C9-6FB6-821C-1C8F-ADC55F55701D}|TaskTracker\\TaskTracker.csproj|d:\\intership\\tasktracker\\services\\rabbitmqpublisher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1781B1C9-6FB6-821C-1C8F-ADC55F55701D}|TaskTracker\\TaskTracker.csproj|solutionrelative:tasktracker\\services\\rabbitmqpublisher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\intership\\TaskTracker\\Program.cs",
+              "RelativeDocumentMoniker": "TaskTracker\\Program.cs",
+              "ToolTip": "D:\\intership\\TaskTracker\\Program.cs",
+              "RelativeToolTip": "TaskTracker\\Program.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAUwCoAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-21T11:48:01.777Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RabbitMqPublisher.cs",
+              "DocumentMoniker": "D:\\intership\\TaskTracker\\Services\\RabbitMqPublisher.cs",
+              "RelativeDocumentMoniker": "TaskTracker\\Services\\RabbitMqPublisher.cs",
+              "ToolTip": "D:\\intership\\TaskTracker\\Services\\RabbitMqPublisher.cs",
+              "RelativeToolTip": "TaskTracker\\Services\\RabbitMqPublisher.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABMAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-21T11:48:00.324Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
