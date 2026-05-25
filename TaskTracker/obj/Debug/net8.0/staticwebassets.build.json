@@ -1,1 +1,11 @@
-{"Version":1,"Hash":"yXNvZUxLtggpSg52vap1IfWjYdQlr+gOGSc7OwNaVQQ=","Source":"TaskTracker","BasePath":"/","Mode":"Root","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}
+{
+  "Version": 1,
+  "Hash": "f1pGw7NZ+FMlWKUNFnh3VcG0UNKVwtFEOFZPORgL5yM=",
+  "Source": "TaskTracker",
+  "BasePath": "_content/TaskTracker",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
