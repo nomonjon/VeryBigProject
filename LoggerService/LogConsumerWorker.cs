@@ -11,7 +11,7 @@ public class LogConsumerWorker : BackgroundService
     private readonly ILogger<LogConsumerWorker> _logger;
     private readonly RabbitMqSettings _settings;
     private readonly string _logsDirectory;
-    private readonly IMongoCollection<LogEntry> _collection;
+    private readonly IMongoDatabase _database;
 
     private IConnection? _connection;
     private IChannel? _channel;
@@ -20,12 +20,12 @@ public class LogConsumerWorker : BackgroundService
         ILogger<LogConsumerWorker> logger,
         RabbitMqSettings settings,
         IConfiguration configuration,
-        IMongoCollection<LogEntry> collection)
+        IMongoDatabase database)
     {
         _logger = logger;
         _settings = settings;
         _logsDirectory = configuration["LogsDirectory"] ?? "logs";
-        _collection = collection;
+        _database = database;
 
         Directory.CreateDirectory(_logsDirectory);
     }
@@ -37,7 +37,6 @@ public class LogConsumerWorker : BackgroundService
         {
             try
             {
-
                 _logger.LogInformation("Connecting to RabbitMQ at {Host}", _settings.HostName);
 
                 var factory = new ConnectionFactory
@@ -86,6 +85,7 @@ public class LogConsumerWorker : BackgroundService
                 _logger.LogInformation("Connected, listening on logs.queue");
 
                 await base.StartAsync(cancellationToken);
+                return;
             }
             catch (Exception ex)
             {
@@ -106,13 +106,12 @@ public class LogConsumerWorker : BackgroundService
             try
             {
                 var json = Encoding.UTF8.GetString(args.Body.Span);
-                var logEntry = JsonSerializer.Deserialize<JsonElement>(json);
+                var logElement = JsonSerializer.Deserialize<JsonElement>(json);
 
-                var line = FormatLogEntry(logEntry);
-                var entry = ParseLogEntry(logEntry);
+                var entry = ParseLogEntry(logElement);
+                var line = FormatLogEntry(logElement, entry);
 
-                // Write to both destinations simultaneously
-                WriteToFile(line);
+                WriteToFile(line, entry.ServiceName);
                 await WriteToMongoAsync(entry);
 
                 await _channel!.BasicAckAsync(
@@ -147,6 +146,20 @@ public class LogConsumerWorker : BackgroundService
 
     private LogEntry ParseLogEntry(JsonElement log)
     {
+        // ServiceName comes from the "Application" property enriched by each service,
+        // or falls back to MachineName so every service still gets its own collection.
+        var machineName = log.TryGetProperty("MachineName", out var mn)
+            ? mn.GetString() ?? string.Empty : string.Empty;
+
+        var serviceName = log.TryGetProperty("Application", out var app)
+            ? app.GetString() ?? string.Empty : string.Empty;
+
+        if (string.IsNullOrWhiteSpace(serviceName))
+            serviceName = machineName;
+
+        // Normalise to a safe Mongo collection name: "TaskTracker", "GrpcServer", etc.
+        serviceName = NormaliseCollectionName(serviceName);
+
         return new LogEntry
         {
             Timestamp = log.TryGetProperty("@t", out var ts)
@@ -161,8 +174,8 @@ public class LogConsumerWorker : BackgroundService
             SourceContext = log.TryGetProperty("SourceContext", out var ctx)
                 ? ctx.GetString() ?? string.Empty : string.Empty,
 
-            MachineName = log.TryGetProperty("MachineName", out var mn)
-                ? mn.GetString() ?? string.Empty : string.Empty,
+            MachineName = machineName,
+            ServiceName = serviceName,
 
             Exception = log.TryGetProperty("@x", out var ex)
                 ? ex.GetString() : null,
@@ -173,54 +186,52 @@ public class LogConsumerWorker : BackgroundService
 
     private async Task WriteToMongoAsync(LogEntry entry)
     {
-        await _collection.InsertOneAsync(entry);
-        _logger.LogDebug("Log entry written to MongoDB: {Level} {SourceContext}",
-            entry.Level, entry.SourceContext);
+        // Each service gets its own collection: "logs_tasktracker", "logs_grpcserver", etc.
+        var collectionName = $"logs_{entry.ServiceName.ToLower()}";
+        var collection = _database.GetCollection<LogEntry>(collectionName);
+
+        await collection.InsertOneAsync(entry);
+
+        _logger.LogDebug(
+            "Log written to MongoDB collection '{Collection}': [{Level}] {SourceContext}",
+            collectionName, entry.Level, entry.SourceContext);
     }
 
-    private string FormatLogEntry(JsonElement log)
+    private string FormatLogEntry(JsonElement log, LogEntry entry)
     {
-        var timestamp = log.TryGetProperty("@t", out var ts)
-            ? ts.GetString() : DateTime.UtcNow.ToString("o");
+        var line = $"{entry.Timestamp} [{entry.Level}] ({entry.MachineName}/{entry.ServiceName}) {entry.SourceContext} - {entry.Message}";
 
-        var level = log.TryGetProperty("@l", out var lvl)
-            ? lvl.GetString() : "Information"; // compact formatter omits @l when Information
-
-        var message = log.TryGetProperty("@m", out var msg)
-            ? msg.GetString() : string.Empty;
-
-        var source = log.TryGetProperty("SourceContext", out var ctx)
-            ? ctx.GetString() : string.Empty;
-
-        var machine = log.TryGetProperty("MachineName", out var mn)
-            ? mn.GetString() : string.Empty;
-
-        var exception = log.TryGetProperty("@x", out var ex)
-            ? ex.GetString() : null;
-
-        var line = $"{timestamp} [{level}] ({machine}) {source} - {message}";
-
-        if (!string.IsNullOrEmpty(exception))
-            line += Environment.NewLine + exception;
+        if (!string.IsNullOrEmpty(entry.Exception))
+            line += Environment.NewLine + entry.Exception;
 
         return line;
     }
 
-    private void WriteToFile(string line)
+    private void WriteToFile(string line, string serviceName)
     {
+        var safeService = NormaliseCollectionName(serviceName).ToLower();
+        var dir = Path.Combine(_logsDirectory, safeService);
+        Directory.CreateDirectory(dir);
+
         var fileName = $"log-{DateTime.UtcNow:yyyy-MM-dd}.txt";
-        var filePath = Path.Combine(_logsDirectory, fileName);
+        var filePath = Path.Combine(dir, fileName);
 
-        using var stream = new FileStream(
-            filePath,
-            FileMode.Append,
-            FileAccess.Write,
-            FileShare.Read
-        );
+        using var stream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.Read);
         using var writer = new StreamWriter(stream, Encoding.UTF8);
-
         writer.WriteLine(line);
         writer.Flush();
+    }
+
+    /// <summary>Strips characters that are invalid in MongoDB collection names.</summary>
+    private static string NormaliseCollectionName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "unknown";
+
+        var safe = new string(name
+            .Where(c => char.IsLetterOrDigit(c) || c == '_')
+            .ToArray());
+
+        return string.IsNullOrWhiteSpace(safe) ? "unknown" : safe;
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)

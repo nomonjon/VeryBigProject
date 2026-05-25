@@ -5,10 +5,34 @@ using GrpcServer.Models;
 using GrpcServer.Repository;
 using GrpcServer.Services;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Formatting.Compact;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ── RabbitMQ connection for logging ──────────────────────────────────────────
+var rmqHost     = builder.Configuration["RabbitMQ:HostName"] ?? "localhost";
+var rmqPort     = int.Parse(builder.Configuration["RabbitMQ:Port"] ?? "5672");
+var rmqUser     = builder.Configuration["RabbitMQ:UserName"] ?? "guest";
+var rmqPassword = builder.Configuration["RabbitMQ:Password"] ?? "guest";
 
+var rmqConnection = RabbitMqConnectionFactory.CreateWithRetry(rmqHost, rmqPort, rmqUser, rmqPassword);
+builder.Services.AddSingleton(rmqConnection);
+
+// ── Serilog → Console + RabbitMQ ─────────────────────────────────────────────
+builder.Host.UseSerilog((ctx, _, config) =>
+{
+    config
+        .ReadFrom.Configuration(ctx.Configuration)
+        .Enrich.FromLogContext()
+        .Enrich.WithMachineName()
+        .Enrich.WithProperty("Application", "GrpcServer")   // ← service tag
+        .WriteTo.Console(
+            outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+        .WriteTo.Sink(new RabbitMqLogSink(rmqConnection));
+});
+
+// ── Services ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
@@ -28,8 +52,8 @@ var app = builder.Build();
 app.MapGrpcService<ProductGrpcService>();
 if (app.Environment.IsDevelopment())
     app.MapGrpcReflectionService();
-app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
+app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client.");
 
 using (var scope = app.Services.CreateScope())
 {

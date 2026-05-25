@@ -1,4 +1,3 @@
-// LoggerService/LogEntry.cs
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -15,6 +14,7 @@ public class LogEntry
     public string Message { get; set; } = string.Empty;
     public string SourceContext { get; set; } = string.Empty;
     public string MachineName { get; set; } = string.Empty;
+    public string ServiceName { get; set; } = string.Empty;
     public string? Exception { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

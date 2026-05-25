@@ -1,17 +1,17 @@
 {
   "version": 2,
-  "dgSpecHash": "yhGuVmikfYU=",
+  "dgSpecHash": "MxSDvBGa7OU=",
   "success": true,
-  "projectFilePath": "D:\\intership\\Client\\Client.csproj",
+  "projectFilePath": "D:\\Internship\\VeryBigProject\\Client\\Client.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Nomonjon.Matlubov\\.nuget\\packages\\google.protobuf\\3.34.1\\google.protobuf.3.34.1.nupkg.sha512",
-    "C:\\Users\\Nomonjon.Matlubov\\.nuget\\packages\\grpc.core.api\\2.76.0\\grpc.core.api.2.76.0.nupkg.sha512",
-    "C:\\Users\\Nomonjon.Matlubov\\.nuget\\packages\\grpc.net.client\\2.76.0\\grpc.net.client.2.76.0.nupkg.sha512",
-    "C:\\Users\\Nomonjon.Matlubov\\.nuget\\packages\\grpc.net.common\\2.76.0\\grpc.net.common.2.76.0.nupkg.sha512",
-    "C:\\Users\\Nomonjon.Matlubov\\.nuget\\packages\\grpc.tools\\2.80.0\\grpc.tools.2.80.0.nupkg.sha512",
-    "C:\\Users\\Nomonjon.Matlubov\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
-    "C:\\Users\\Nomonjon.Matlubov\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
-    "C:\\Users\\Nomonjon.Matlubov\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.23.0\\microsoft.visualstudio.azure.containers.tools.targets.1.23.0.nupkg.sha512"
+    "C:\\Users\\Acer\\.nuget\\packages\\google.protobuf\\3.34.1\\google.protobuf.3.34.1.nupkg.sha512",
+    "C:\\Users\\Acer\\.nuget\\packages\\grpc.core.api\\2.76.0\\grpc.core.api.2.76.0.nupkg.sha512",
+    "C:\\Users\\Acer\\.nuget\\packages\\grpc.net.client\\2.76.0\\grpc.net.client.2.76.0.nupkg.sha512",
+    "C:\\Users\\Acer\\.nuget\\packages\\grpc.net.common\\2.76.0\\grpc.net.common.2.76.0.nupkg.sha512",
+    "C:\\Users\\Acer\\.nuget\\packages\\grpc.tools\\2.80.0\\grpc.tools.2.80.0.nupkg.sha512",
+    "C:\\Users\\Acer\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\Acer\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.0\\microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\Acer\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.23.0\\microsoft.visualstudio.azure.containers.tools.targets.1.23.0.nupkg.sha512"
   ],
   "logs": []
 }

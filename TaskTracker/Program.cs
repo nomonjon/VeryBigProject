@@ -72,6 +72,7 @@ builder.Host.UseSerilog((ctx, _, config) =>
         .Enrich.FromLogContext()
         .Enrich.WithMachineName()
         .Enrich.WithThreadId()
+        .Enrich.WithProperty("Application", "TaskTracker")
         .WriteTo.Console(
             outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
         .WriteTo.Sink(new RabbitMqLogSink(publisher));
