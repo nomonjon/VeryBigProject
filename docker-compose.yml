@@ -107,6 +107,40 @@ services:
       mongodb:
         condition: service_started
 
+  logapiservice:
+    networks:
+      - default
+      - shared_network
+    image: ${DOCKER_REGISTRY-}logapiservice
+    build:
+      context: .
+      dockerfile: LogApiService/Dockerfile
+    environment:
+      - ASPNETCORE_HTTP_PORTS=5003
+      - ASPNETCORE_URLS=http://+:5003
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MongoDbSettings__ConnectionString=mongodb://admin:admin@mongodb:27017
+      - MongoDbSettings__DatabaseName=LogsDb
+      - MongoDbSettings__CollectionName=Logs
+    ports:
+      - "5003:5003"
+    depends_on:
+      mongodb:
+        condition: service_started
+
+  logsfrontend:
+    networks:
+      - default
+      - shared_network
+    image: ${DOCKER_REGISTRY-}logsfrontend
+    build:
+      context: .
+      dockerfile: LogsFrontend/Dockerfile
+    ports:
+      - "4200:4200"
+    depends_on:
+      - logapiservice
+
   tasktracker.database:
     networks:
       - default
