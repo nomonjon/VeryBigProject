@@ -1,0 +1,4 @@
+﻿2026-05-26T06:33:16.3526008Z [Information] (3001fd6dc3a2/NotificationService) NotificationService.NotifierWorker - Notifier connected to RabbitMQ on attempt 1
+2026-05-26T06:33:16.4198257Z [Information] (3001fd6dc3a2/NotificationService) Microsoft.Hosting.Lifetime - Application started. Press Ctrl+C to shut down.
+2026-05-26T06:33:16.4261287Z [Information] (3001fd6dc3a2/NotificationService) Microsoft.Hosting.Lifetime - Hosting environment: "Development"
+2026-05-26T06:33:16.4309868Z [Information] (3001fd6dc3a2/NotificationService) Microsoft.Hosting.Lifetime - Content root path: "/app"
