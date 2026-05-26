@@ -1,0 +1,80 @@
+<div class="dashboard-container">
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <h1>System Logs</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn-toggle" [class.active]="isPolling" (click)="togglePolling()">
+        <span class="indicator"></span>
+        {{ isPolling ? 'Live Updates On' : 'Live Updates Off' }}
+      </button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="filters-panel glass-panel">
+      <div class="filter-group search-group">
+        <label>Search Message</label>
+        <input type="text" [(ngModel)]="filters.search" (keyup.enter)="applyFilters()" placeholder="Search logs..." class="input-modern" />
+      </div>
+
+      <div class="filter-group">
+        <label>Service Name</label>
+        <input type="text" [(ngModel)]="filters.serviceName" (keyup.enter)="applyFilters()" placeholder="e.g. LoggerService" class="input-modern" />
+      </div>
+
+      <div class="filter-group">
+        <label>Log Level</label>
+        <select [(ngModel)]="filters.level" (change)="applyFilters()" class="input-modern">
+          <option value="">All Levels</option>
+          <option value="Information">Info</option>
+          <option value="Warning">Warning</option>
+          <option value="Error">Error</option>
+          <option value="Debug">Debug</option>
+          <option value="Fatal">Fatal</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-primary" (click)="applyFilters()">Apply Filters</button>
+      </div>
+    </div>
+
+    <div class="table-container glass-panel">
+      <table class="logs-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Level</th>
+            <th>Service</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of logs" class="log-row">
+            <td class="col-time">{{ log.createdAt | date:'medium' }}</td>
+            <td class="col-level">
+              <span class="badge" [ngClass]="getLevelClass(log.level)">{{ log.level }}</span>
+            </td>
+            <td class="col-service">{{ log.serviceName || 'N/A' }}</td>
+            <td class="col-message" [title]="log.message">{{ log.message }}</td>
+          </tr>
+          <tr *ngIf="logs.length === 0">
+            <td colspan="4" class="no-data">No logs found matching criteria.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <button class="btn-icon" (click)="prevPage()" [disabled]="page === 1">
+        &larr; Prev
+      </button>
+      <span class="page-info">Page {{ page }} of {{ totalPages || 1 }} ({{ totalCount }} total)</span>
+      <button class="btn-icon" (click)="nextPage()" [disabled]="page >= totalPages">
+        Next &rarr;
+      </button>
+    </div>
+  </main>
+</div>
