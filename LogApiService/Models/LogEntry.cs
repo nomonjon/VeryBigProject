@@ -3,12 +3,11 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace LogApiService.Models;
 
-[BsonIgnoreExtraElements]
 public class LogEntry
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = string.Empty;
+    public string? Id { get; set; }
 
     public string Timestamp { get; set; } = string.Empty;
     public string Level { get; set; } = string.Empty;

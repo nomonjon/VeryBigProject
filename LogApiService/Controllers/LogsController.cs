@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using LogApiService.Models;
 using LogApiService.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LogApiService.Controllers;
 
@@ -16,23 +16,16 @@ public class LogsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResult<LogEntry>>> GetLogs([FromQuery] LogQueryParameters query)
+    public async Task<ActionResult<PaginatedResult<LogEntry>>> Get(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        [FromQuery] string? level = null,
+        [FromQuery] string? serviceName = null,
+        [FromQuery] string? search = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null)
     {
-        var result = await _logService.GetLogsAsync(query);
+        var result = await _logService.GetLogsAsync(page, pageSize, level, serviceName, search, startDate, endDate);
         return Ok(result);
-    }
-
-    [HttpGet("services")]
-    public async Task<ActionResult<List<string>>> GetServices()
-    {
-        var services = await _logService.GetDistinctServicesAsync();
-        return Ok(services);
-    }
-
-    [HttpGet("levels")]
-    public async Task<ActionResult<List<string>>> GetLevels()
-    {
-        var levels = await _logService.GetDistinctLevelsAsync();
-        return Ok(levels);
     }
 }

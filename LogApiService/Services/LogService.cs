@@ -1,7 +1,6 @@
-using MongoDB.Driver;
 using LogApiService.Models;
-using LogApiService.Settings;
-using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace LogApiService.Services;
 
@@ -9,62 +8,47 @@ public class LogService
 {
     private readonly IMongoCollection<LogEntry> _logs;
 
-    public LogService(IOptions<MongoDbSettings> settings)
+    public LogService(IConfiguration configuration)
     {
-        var client = new MongoClient(settings.Value.ConnectionString);
-        var database = client.GetDatabase(settings.Value.DatabaseName);
-        _logs = database.GetCollection<LogEntry>(settings.Value.CollectionName);
+        var client = new MongoClient(configuration.GetValue<string>("MongoDB:ConnectionString"));
+        var database = client.GetDatabase(configuration.GetValue<string>("MongoDB:DatabaseName"));
+        _logs = database.GetCollection<LogEntry>("Logs");
     }
 
-    public async Task<PagedResult<LogEntry>> GetLogsAsync(LogQueryParameters query)
+    public async Task<PaginatedResult<LogEntry>> GetLogsAsync(
+        int page, int pageSize, string? level, string? serviceName, string? search, DateTime? startDate, DateTime? endDate)
     {
         var filterBuilder = Builders<LogEntry>.Filter;
-        var filters = new List<FilterDefinition<LogEntry>>();
+        var filter = filterBuilder.Empty;
 
-        if (!string.IsNullOrEmpty(query.Level))
-            filters.Add(filterBuilder.Eq(x => x.Level, query.Level));
+        if (!string.IsNullOrEmpty(level))
+            filter &= filterBuilder.Eq(x => x.Level, level);
 
-        if (!string.IsNullOrEmpty(query.ServiceName))
-            filters.Add(filterBuilder.Eq(x => x.ServiceName, query.ServiceName));
+        if (!string.IsNullOrEmpty(serviceName))
+            filter &= filterBuilder.Eq(x => x.ServiceName, serviceName);
 
-        if (!string.IsNullOrEmpty(query.Search))
-            filters.Add(filterBuilder.Regex(x => x.Message, new MongoDB.Bson.BsonRegularExpression(query.Search, "i")));
+        if (!string.IsNullOrEmpty(search))
+            filter &= filterBuilder.Regex(x => x.Message, new BsonRegularExpression(search, "i"));
 
-        if (query.From.HasValue)
-            filters.Add(filterBuilder.Gte(x => x.CreatedAt, query.From.Value));
+        if (startDate.HasValue)
+            filter &= filterBuilder.Gte(x => x.CreatedAt, startDate.Value);
 
-        if (query.To.HasValue)
-            filters.Add(filterBuilder.Lte(x => x.CreatedAt, query.To.Value));
-
-        var filter = filters.Count > 0 ? filterBuilder.And(filters) : filterBuilder.Empty;
-
-        var sortDefinition = query.SortOrder.ToLower() == "asc"
-            ? Builders<LogEntry>.Sort.Ascending(x => x.CreatedAt)
-            : Builders<LogEntry>.Sort.Descending(x => x.CreatedAt);
+        if (endDate.HasValue)
+            filter &= filterBuilder.Lte(x => x.CreatedAt, endDate.Value);
 
         var totalCount = await _logs.CountDocumentsAsync(filter);
         var items = await _logs.Find(filter)
-            .Sort(sortDefinition)
-            .Skip((query.Page - 1) * query.PageSize)
-            .Limit(query.PageSize)
+            .SortByDescending(x => x.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Limit(pageSize)
             .ToListAsync();
 
-        return new PagedResult<LogEntry>
+        return new PaginatedResult<LogEntry>
         {
             Items = items,
-            TotalCount = totalCount,
-            Page = query.Page,
-            PageSize = query.PageSize
+            TotalCount = (int)totalCount,
+            Page = page,
+            PageSize = pageSize
         };
-    }
-
-    public async Task<List<string>> GetDistinctServicesAsync()
-    {
-        return await _logs.Distinct<string>("ServiceName", Builders<LogEntry>.Filter.Empty).ToListAsync();
-    }
-
-    public async Task<List<string>> GetDistinctLevelsAsync()
-    {
-        return await _logs.Distinct<string>("Level", Builders<LogEntry>.Filter.Empty).ToListAsync();
     }
 }

@@ -1,155 +1,80 @@
-<div class="dashboard">
-  <!-- Header -->
+<div class="dashboard-container">
   <header class="header">
-    <div class="header-left">
-      <div class="logo">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <polyline points="14,2 14,8 20,8" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="16" y1="13" x2="8" y2="13" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round"/>
-          <line x1="16" y1="17" x2="8" y2="17" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round"/>
-          <polyline points="10,9 9,9 8,9" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <defs>
-            <linearGradient id="logoGrad" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#6366f1"/>
-              <stop offset="1" stop-color="#a855f7"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <h1>Log Monitor</h1>
-      </div>
-      <div class="connection-status" [class]="connectionStatus">
-        <span class="status-dot"></span>
-        <span class="status-text">{{ connectionStatus === 'connected' ? 'Live' : connectionStatus === 'disconnected' ? 'Disconnected' : 'Connecting...' }}</span>
-      </div>
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <h1>System Logs</h1>
     </div>
-    <div class="header-right">
-      <span class="log-count">{{ totalCount | number }} logs</span>
-      <button class="poll-toggle" [class.active]="pollingEnabled" (click)="togglePolling()" title="Toggle auto-refresh">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 4 23 10 17 10"></polyline>
-          <polyline points="1 20 1 14 7 14"></polyline>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-        </svg>
-        {{ pollingEnabled ? 'Auto' : 'Paused' }}
+    <div class="header-actions">
+      <button class="btn-toggle" [class.active]="isPolling" (click)="togglePolling()">
+        <span class="indicator"></span>
+        {{ isPolling ? 'Live Updates On' : 'Live Updates Off' }}
       </button>
-      <span class="last-updated" *ngIf="lastUpdated">
-        Updated {{ getTimeAgo(lastUpdated.toISOString()) }}
-      </span>
     </div>
   </header>
 
-  <!-- Filters -->
-  <div class="filters-bar">
-    <div class="filter-group">
-      <div class="search-wrapper">
-        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input
-          type="text"
-          class="search-input"
-          placeholder="Search messages..."
-          [(ngModel)]="searchText"
-          (keyup.enter)="applyFilters()"
-          id="search-input"
-        />
+  <main class="main-content">
+    <div class="filters-panel glass-panel">
+      <div class="filter-group search-group">
+        <label>Search Message</label>
+        <input type="text" [(ngModel)]="filters.search" (keyup.enter)="applyFilters()" placeholder="Search logs..." class="input-modern" />
       </div>
 
-      <select class="filter-select" [(ngModel)]="selectedService" (change)="applyFilters()" id="service-filter">
-        <option value="">All Services</option>
-        <option *ngFor="let s of services" [value]="s">{{ s }}</option>
-      </select>
+      <div class="filter-group">
+        <label>Service Name</label>
+        <input type="text" [(ngModel)]="filters.serviceName" (keyup.enter)="applyFilters()" placeholder="e.g. LoggerService" class="input-modern" />
+      </div>
 
-      <select class="filter-select" [(ngModel)]="selectedLevel" (change)="applyFilters()" id="level-filter">
-        <option value="">All Levels</option>
-        <option *ngFor="let l of levels" [value]="l">{{ l }}</option>
-      </select>
+      <div class="filter-group">
+        <label>Log Level</label>
+        <select [(ngModel)]="filters.level" (change)="applyFilters()" class="input-modern">
+          <option value="">All Levels</option>
+          <option value="Information">Info</option>
+          <option value="Warning">Warning</option>
+          <option value="Error">Error</option>
+          <option value="Debug">Debug</option>
+          <option value="Fatal">Fatal</option>
+        </select>
+      </div>
 
-      <input type="datetime-local" class="filter-input" [(ngModel)]="fromDate" (change)="applyFilters()" placeholder="From" id="from-date" />
-      <input type="datetime-local" class="filter-input" [(ngModel)]="toDate" (change)="applyFilters()" placeholder="To" id="to-date" />
+      <div class="filter-actions">
+        <button class="btn-primary" (click)="applyFilters()">Apply Filters</button>
+      </div>
     </div>
 
-    <div class="filter-actions">
-      <button class="btn btn-search" (click)="applyFilters()" id="apply-filters">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-        </svg>
-        Apply
+    <div class="table-container glass-panel">
+      <table class="logs-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Level</th>
+            <th>Service</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of logs" class="log-row">
+            <td class="col-time">{{ log.createdAt | date:'medium' }}</td>
+            <td class="col-level">
+              <span class="badge" [ngClass]="getLevelClass(log.level)">{{ log.level }}</span>
+            </td>
+            <td class="col-service">{{ log.serviceName || 'N/A' }}</td>
+            <td class="col-message" [title]="log.message">{{ log.message }}</td>
+          </tr>
+          <tr *ngIf="logs.length === 0">
+            <td colspan="4" class="no-data">No logs found matching criteria.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <button class="btn-icon" (click)="prevPage()" [disabled]="page === 1">
+        &larr; Prev
       </button>
-      <button class="btn btn-clear" (click)="clearFilters()" id="clear-filters">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-        Clear
+      <span class="page-info">Page {{ page }} of {{ totalPages || 1 }} ({{ totalCount }} total)</span>
+      <button class="btn-icon" (click)="nextPage()" [disabled]="page >= totalPages">
+        Next &rarr;
       </button>
     </div>
-  </div>
-
-  <!-- Loading Bar -->
-  <div class="loading-bar" *ngIf="loading">
-    <div class="loading-progress"></div>
-  </div>
-
-  <!-- Logs Table -->
-  <div class="table-container">
-    <table class="logs-table" id="logs-table">
-      <thead>
-        <tr>
-          <th class="col-time">Timestamp</th>
-          <th class="col-service">Service</th>
-          <th class="col-level">Level</th>
-          <th class="col-message">Message</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let log of logs; let i = index" class="log-row" [class.fade-in]="true" [style.animation-delay]="i * 20 + 'ms'">
-          <td class="col-time">
-            <span class="time-full">{{ log.createdAt | date:'yyyy-MM-dd HH:mm:ss' }}</span>
-            <span class="time-ago">{{ getTimeAgo(log.createdAt) }}</span>
-          </td>
-          <td class="col-service">
-            <span class="service-badge">{{ log.serviceName || 'N/A' }}</span>
-          </td>
-          <td class="col-level">
-            <span class="level-badge" [class]="getLevelClass(log.level)">{{ log.level }}</span>
-          </td>
-          <td class="col-message">{{ log.message }}</td>
-        </tr>
-        <tr *ngIf="logs.length === 0 && !loading">
-          <td colspan="4" class="empty-state">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4">
-              <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"></path>
-            </svg>
-            <p>No logs found</p>
-            <span>Try adjusting your filters</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Pagination -->
-  <div class="pagination" *ngIf="totalPages > 1">
-    <div class="page-info">
-      Showing {{ (currentPage - 1) * pageSize + 1 }}-{{ currentPage * pageSize < totalCount ? currentPage * pageSize : totalCount }} of {{ totalCount | number }}
-    </div>
-    <div class="page-controls">
-      <button class="page-btn" (click)="goToPage(1)" [disabled]="currentPage === 1" id="first-page">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>
-      </button>
-      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1" id="prev-page">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </button>
-      <button *ngFor="let p of getVisiblePages()" class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
-      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages" id="next-page">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
-      <button class="page-btn" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages" id="last-page">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
-      </button>
-    </div>
-  </div>
+  </main>
 </div>

@@ -1,60 +1,27 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { LogEntry, PaginatedResult } from './log.model';
 
-export interface LogEntry {
-  id: string;
-  serviceName: string;
-  level: string;
-  message: string;
-  createdAt: string;
-}
-
-export interface PagedResult {
-  items: LogEntry[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
-export interface LogQuery {
-  page?: number;
-  pageSize?: number;
-  level?: string;
-  serviceName?: string;
-  search?: string;
-  from?: string;
-  to?: string;
-  sortBy?: string;
-  sortOrder?: string;
-}
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class LogsService {
-  private apiUrl = 'http://localhost:5003/api/logs';
+  private apiUrl = 'http://localhost:5200/api/logs';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  getLogs(query: LogQuery): Observable<PagedResult> {
-    let params = new HttpParams();
-    if (query.page) params = params.set('page', query.page.toString());
-    if (query.pageSize) params = params.set('pageSize', query.pageSize.toString());
-    if (query.level) params = params.set('level', query.level);
-    if (query.serviceName) params = params.set('serviceName', query.serviceName);
-    if (query.search) params = params.set('search', query.search);
-    if (query.from) params = params.set('from', query.from);
-    if (query.to) params = params.set('to', query.to);
-    if (query.sortBy) params = params.set('sortBy', query.sortBy);
-    if (query.sortOrder) params = params.set('sortOrder', query.sortOrder);
-    return this.http.get<PagedResult>(this.apiUrl, { params });
-  }
+  getLogs(page: number, pageSize: number, filters: any): Observable<PaginatedResult<LogEntry>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
 
-  getServices(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/services`);
-  }
+    if (filters.level) params = params.set('level', filters.level);
+    if (filters.serviceName) params = params.set('serviceName', filters.serviceName);
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.startDate) params = params.set('startDate', filters.startDate);
+    if (filters.endDate) params = params.set('endDate', filters.endDate);
 
-  getLevels(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/levels`);
+    return this.http.get<PaginatedResult<LogEntry>>(this.apiUrl, { params });
   }
 }
