@@ -31,17 +31,18 @@ public sealed class RabbitMqLogSink : ILogEventSink, IDisposable
             // CreateChannelAsync is not awaitable here (sync Emit), so we use sync factory
             using var channel = _connection.CreateChannelAsync().GetAwaiter().GetResult();
 
-            channel.ExchangeDeclareAsync(
-                exchange: "logs",
-                type: "fanout",
+            channel.QueueDeclareAsync(
+                queue: "logs.GrpcServer",
                 durable: true,
-                autoDelete: false).GetAwaiter().GetResult();
+                exclusive: false,
+                autoDelete: false,
+                arguments: null).GetAwaiter().GetResult();
 
             var props = new BasicProperties { Persistent = true };
 
             channel.BasicPublishAsync(
-                exchange: "logs",
-                routingKey: "",
+                exchange: string.Empty,
+                routingKey: "logs.GrpcServer",
                 mandatory: false,
                 basicProperties: props,
                 body: body).GetAwaiter().GetResult();

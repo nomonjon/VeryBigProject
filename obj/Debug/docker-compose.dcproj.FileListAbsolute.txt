@@ -81,3 +81,4 @@ D:\intership\obj\Debug\docker-compose.dcproj.AssemblyReference.cache
 D:\intership\obj\Debug\docker-compose.dcproj.CoreCompileInputs.cache
 D:\intership\obj\Debug\docker-c.35A3FFBA.Up2Date
 D:\Internship\VeryBigProject\obj\Debug\docker-compose.dcproj.CoreCompileInputs.cache
+D:\interngit\VeryBigProject\obj\Debug\docker-compose.dcproj.CoreCompileInputs.cache

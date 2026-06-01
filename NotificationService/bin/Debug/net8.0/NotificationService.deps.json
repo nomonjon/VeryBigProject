@@ -9,7 +9,6 @@
       "NotificationService/1.0.0": {
         "dependencies": {
           "Microsoft.Extensions.Hosting": "8.0.1",
-          "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "1.23.0",
           "RabbitMQ.Client": "7.2.1",
           "Serilog": "4.2.0",
           "Serilog.Enrichers.Environment": "3.0.1",
@@ -380,7 +379,6 @@
           }
         }
       },
-      "Microsoft.VisualStudio.Azure.Containers.Tools.Targets/1.23.0": {},
       "RabbitMQ.Client/7.2.1": {
         "dependencies": {
           "System.IO.Pipelines": "8.0.0",
@@ -695,13 +693,6 @@
       "sha512": "sha512-bXJEZrW9ny8vjMF1JV253WeLhpEVzFo1lyaZu1vQ4ZxWUlVvknZ/+ftFgVheLubb4eZPSwwxBeqS1JkCOjxd8g==",
       "path": "microsoft.extensions.primitives/8.0.0",
       "hashPath": "microsoft.extensions.primitives.8.0.0.nupkg.sha512"
-    },
-    "Microsoft.VisualStudio.Azure.Containers.Tools.Targets/1.23.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-2wDnb4umupJZ/1ikgWozFVpggH1mlHQFc0odXVv2ZagL3RYwXgW9zmC15fiqIBzmaC0vLZUnLGwDY+p8ZR7Syw==",
-      "path": "microsoft.visualstudio.azure.containers.tools.targets/1.23.0",
-      "hashPath": "microsoft.visualstudio.azure.containers.tools.targets.1.23.0.nupkg.sha512"
     },
     "RabbitMQ.Client/7.2.1": {
       "type": "package",

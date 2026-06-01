@@ -22,6 +22,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      product.database:
+        condition: service_started
 
   tasktracker:
     networks:
@@ -43,6 +45,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      tasktracker.database:
+        condition: service_started
 
   notifier:
     networks:
@@ -83,48 +87,32 @@ services:
       retries: 5
       start_period: 20s
 
-  loggerservice:
+  logplatform:
     networks:
       - default
       - shared_network
-    image: ${DOCKER_REGISTRY-}loggerservice
+    image: ${DOCKER_REGISTRY-}logplatform
     build:
       context: .
-      dockerfile: LoggerService/Dockerfile
+      dockerfile: LogPlatform/Dockerfile
     environment:
-      - DOTNET_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5080
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=guest
       - RabbitMQ__Password=guest
       - MongoDB__ConnectionString=mongodb://admin:admin@mongodb:27017
       - MongoDB__DatabaseName=LogsDb
+    ports:
+      - "5080:5080"
     volumes:
-      - ./LoggerService/logs:/app/logs
+      - logger_logs:/app/logs # Linked to your declared named volume below
     depends_on:
       rabbitmq:
         condition: service_healthy
       mongodb:
         condition: service_started
-
-  logapiservice:
-    networks:
-      - default
-      - shared_network
-    image: ${DOCKER_REGISTRY-}logapiservice
-    build:
-      context: .
-      dockerfile: LogApiService/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - MongoDB__ConnectionString=mongodb://admin:admin@mongodb:27017
-      - MongoDB__DatabaseName=LogsDb
-    ports:
-      - "5200:5200"
-    depends_on:
-      mongodb:
-        condition: service_started
-
 
   tasktracker.database:
     networks:
@@ -163,6 +151,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+
 volumes:
   rabbitmq_data:
   logger_logs:

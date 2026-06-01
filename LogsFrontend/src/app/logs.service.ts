@@ -7,7 +7,7 @@ import { LogEntry, PaginatedResult } from './log.model';
   providedIn: 'root'
 })
 export class LogsService {
-  private apiUrl = 'http://localhost:5200/api/logs';
+  private apiUrl = 'http://localhost:5080/api/logs';
 
   constructor(private http: HttpClient) { }
 

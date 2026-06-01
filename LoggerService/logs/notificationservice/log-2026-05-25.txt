@@ -1,6 +1,0 @@
-﻿2026-05-25T10:01:40.8918209Z [Information] (d1923d3f9fcf/NotificationService) Microsoft.Hosting.Lifetime - Application is shutting down...
-2026-05-25T10:01:40.8918209Z [Information] (d1923d3f9fcf/NotificationService) Microsoft.Hosting.Lifetime - Application is shutting down...
-2026-05-25T11:53:38.5536981Z [Information] (d1923d3f9fcf/NotificationService) NotificationService.NotifierWorker - Notifier connected to RabbitMQ on attempt 1
-2026-05-25T11:53:38.6027348Z [Information] (d1923d3f9fcf/NotificationService) Microsoft.Hosting.Lifetime - Application started. Press Ctrl+C to shut down.
-2026-05-25T11:53:38.6063030Z [Information] (d1923d3f9fcf/NotificationService) Microsoft.Hosting.Lifetime - Hosting environment: "Development"
-2026-05-25T11:53:38.6089412Z [Information] (d1923d3f9fcf/NotificationService) Microsoft.Hosting.Lifetime - Content root path: "/app"

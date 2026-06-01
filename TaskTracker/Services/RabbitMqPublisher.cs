@@ -10,7 +10,7 @@ namespace TaskTracker.Services;
 public class RabbitMqPublisher(IConnection connection) : IAsyncDisposable
 {
     private const string QueueName = "task.status.changed";
-    private const string LogsExchange = "logs";
+    private const string LogsQueue = "logs.TaskTracker";
 
     public static async Task<RabbitMqPublisher> CreateAsync(IOptions<RabbitMqSettings> options)
     {
@@ -39,11 +39,12 @@ public class RabbitMqPublisher(IConnection connection) : IAsyncDisposable
             autoDelete: false,
             arguments: null);
 
-        await channel.ExchangeDeclareAsync(
-            exchange: LogsExchange,
-            type: "fanout",
+        await channel.QueueDeclareAsync(
+            queue: LogsQueue,
             durable: true,
-            autoDelete: false);
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
     }
 
     public async Task PublishAsync(TaskStatusChangedEvent @event)
@@ -69,8 +70,8 @@ public class RabbitMqPublisher(IConnection connection) : IAsyncDisposable
         var props = new BasicProperties { Persistent = true };
 
         await channel.BasicPublishAsync(
-            exchange: LogsExchange,
-            routingKey: "logs",
+            exchange: string.Empty,
+            routingKey: LogsQueue,
             mandatory: false,
             basicProperties: props,
             body: body);

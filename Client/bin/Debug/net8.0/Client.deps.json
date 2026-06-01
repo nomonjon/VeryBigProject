@@ -9,9 +9,7 @@
       "Client/1.0.0": {
         "dependencies": {
           "Google.Protobuf": "3.34.1",
-          "Grpc.Net.Client": "2.76.0",
-          "Grpc.Tools": "2.80.0",
-          "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "1.23.0"
+          "Grpc.Net.Client": "2.76.0"
         },
         "runtime": {
           "Client.dll": {}
@@ -56,7 +54,6 @@
           }
         }
       },
-      "Grpc.Tools/2.80.0": {},
       "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.0": {
         "runtime": {
           "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
@@ -75,8 +72,7 @@
             "fileVersion": "8.0.23.53103"
           }
         }
-      },
-      "Microsoft.VisualStudio.Azure.Containers.Tools.Targets/1.23.0": {}
+      }
     }
   },
   "libraries": {
@@ -113,13 +109,6 @@
       "path": "grpc.net.common/2.76.0",
       "hashPath": "grpc.net.common.2.76.0.nupkg.sha512"
     },
-    "Grpc.Tools/2.80.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-NS1AxwVZnrdbBoMf5L5ruGjBjoLBej9avhqxWNsgfu2GU6FhpxEVJOwLJsdljlDCjvquJiAH2zf/WodIWMvf2w==",
-      "path": "grpc.tools/2.80.0",
-      "hashPath": "grpc.tools.2.80.0.nupkg.sha512"
-    },
     "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.0": {
       "type": "package",
       "serviceable": true,
@@ -133,13 +122,6 @@
       "sha512": "sha512-arDBqTgFCyS0EvRV7O3MZturChstm50OJ0y9bDJvAcmEPJm0FFpFyjU/JLYyStNGGey081DvnQYlncNX5SJJGA==",
       "path": "microsoft.extensions.logging.abstractions/8.0.0",
       "hashPath": "microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512"
-    },
-    "Microsoft.VisualStudio.Azure.Containers.Tools.Targets/1.23.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-2wDnb4umupJZ/1ikgWozFVpggH1mlHQFc0odXVv2ZagL3RYwXgW9zmC15fiqIBzmaC0vLZUnLGwDY+p8ZR7Syw==",
-      "path": "microsoft.visualstudio.azure.containers.tools.targets/1.23.0",
-      "hashPath": "microsoft.visualstudio.azure.containers.tools.targets.1.23.0.nupkg.sha512"
     }
   }
 }
