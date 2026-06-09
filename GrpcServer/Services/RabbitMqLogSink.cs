@@ -10,15 +10,10 @@ namespace GrpcServer.Services;
 /// <summary>
 /// Serilog sink that publishes every log event to the shared "logs" fanout exchange.
 /// </summary>
-public sealed class RabbitMqLogSink : ILogEventSink, IDisposable
+public sealed class RabbitMqLogSink(IConnection connection) : ILogEventSink, IDisposable
 {
-    private readonly IConnection _connection;
+    private readonly IConnection _connection = connection;
     private readonly ITextFormatter _formatter = new RenderedCompactJsonFormatter();
-
-    public RabbitMqLogSink(IConnection connection)
-    {
-        _connection = connection;
-    }
 
     public void Emit(LogEvent logEvent)
     {

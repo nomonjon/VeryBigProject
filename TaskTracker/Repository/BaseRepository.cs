@@ -31,7 +31,7 @@ public class BaseRepository<T>(AppDbContext context) where T : BaseEntity
     }
     public async Task<bool> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var entity = await context.Set<T>().FindAsync(id, cancellationToken);
+        var entity = await context.Set<T>().FindAsync(new object[] { id }, cancellationToken);
 
         if (entity is null)
             return false;
@@ -43,15 +43,19 @@ public class BaseRepository<T>(AppDbContext context) where T : BaseEntity
     }
     public async Task<bool> Update(T updatedEntity, CancellationToken cancellationToken)
     {
-        var existing = await context.Set<T>().FindAsync(updatedEntity.Id, cancellationToken);
+        var existing = await context.Set<T>().FindAsync(new object[] { updatedEntity.Id }, cancellationToken);
 
         if (existing is null)
             return false;
 
-        context.Entry(existing).CurrentValues.SetValues(updatedEntity);
-        var affected = await context.SaveChangesAsync(cancellationToken);
+        if (!ReferenceEquals(existing, updatedEntity))
+        {
+            context.Entry(existing).CurrentValues.SetValues(updatedEntity);
+        }
 
-        return affected >= 1;
+        await context.SaveChangesAsync(cancellationToken);
+
+        return true;
     }
     public async Task<User?> GetByEmail(string email, CancellationToken cancellationToken)
     {

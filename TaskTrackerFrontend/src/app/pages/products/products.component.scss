@@ -1,0 +1,4 @@
+.muted  { color: var(--muted); }
+.price  { color: var(--success); font-weight: 500; }
+.actions { display: flex; gap: 0.5rem; }
+textarea.form-control { resize: vertical; min-height: 60px; }

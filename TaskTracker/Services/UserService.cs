@@ -95,5 +95,20 @@ public class UserService(IUserRepository userRepo, IOptions<DbConection> _conect
         return Result<UserDto>.Success(user.ToUserDto());
     }
 
+    public async Task<Result<UserDto>> UpdateRoleAsync(Guid id, UpdateUserRoleDto updatedUserRole, CancellationToken cancellationToken)
+    {
+        var user = await userRepo.GetByIdWithTraking(id, cancellationToken);
+        
+        if(user is null)
+            return Result<UserDto>.Failure(Error.NotFound);
 
+        user.Role = updatedUserRole.Role;
+        
+        var SavedUser = await userRepo.Update(user, cancellationToken);
+
+        if (SavedUser is false)
+            return Result<UserDto>.Failure(Error.NotModified);
+
+        return Result<UserDto>.Success(user.ToUserDto());
+    }
 }

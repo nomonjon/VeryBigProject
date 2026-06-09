@@ -1,0 +1,96 @@
+<div class="page-header">
+  <h1>Users</h1>
+  <button class="btn btn-primary" (click)="openCreate()">+ New User</button>
+</div>
+
+@if (loading) {
+  <div class="loading-wrap"><span class="spinner"></span></div>
+} @else {
+  @if (users.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">👥</div>
+      <p>No users found.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th><th>Email</th><th>Position</th><th>Role</th><th>Tasks</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of users; track u.id) {
+            <tr>
+              <td><strong>{{ u.fullName }}</strong></td>
+              <td class="muted">{{ u.email }}</td>
+              <td>{{ u.position }}</td>
+              <td><span class="badge" [class.admin]="u.role === 'Admin'">{{ u.role }}</span></td>
+              <td><span class="badge badge-user">{{ u.workTasks?.length || 0 }}</span></td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-ghost btn-sm" (click)="openRoleModal(u)">Role</button>
+                  <button class="btn btn-ghost btn-sm" (click)="openEdit(u)">Edit</button>
+                  <button class="btn btn-danger btn-sm" (click)="delete(u.id)">Delete</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}
+
+@if (showModal) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ editingId ? 'Edit User' : 'New User' }}</h2>
+      @if (error) { <div class="error-msg">{{ error }}</div> }
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input class="form-control" type="text" formControlName="fullName" placeholder="Jane Smith" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input class="form-control" type="email" formControlName="email" placeholder="jane@company.com" />
+        </div>
+        <div class="form-group">
+          <label>Position</label>
+          <input class="form-control" type="text" formControlName="position" placeholder="Developer, Manager…" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="submitting">
+            @if (submitting) { <span class="spinner"></span> } @else { {{ editingId ? 'Save' : 'Create' }} }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showRoleModal) {
+  <div class="modal-overlay" (click)="closeRoleModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Update Role</h2>
+      <form [formGroup]="roleForm" (ngSubmit)="submitRole()">
+        <div class="form-group">
+          <label>Role</label>
+          <select class="form-control" formControlName="role">
+            <option value="User">User</option>
+            <option value="Manager">Manager</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" (click)="closeRoleModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="submitting">
+            @if (submitting) { <span class="spinner"></span> } @else { Save Role }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

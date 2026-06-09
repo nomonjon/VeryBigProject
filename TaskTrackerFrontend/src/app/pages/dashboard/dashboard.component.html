@@ -1,0 +1,54 @@
+<div class="dashboard">
+  @if (currentUser$ | async; as user) {
+    <div class="dash-hero">
+      <h1>Good day, <span class="accent">{{ user.fullName }}</span></h1>
+      <p class="sub">Here's an overview of your workspace</p>
+    </div>
+  }
+  @if (loading) {
+    <div class="loading-wrap"><span class="spinner"></span></div>
+  } @else {
+    <div class="stats-grid">
+      <a class="stat-card" routerLink="/projects">
+        <div class="stat-icon">📁</div>
+        <div class="stat-value">{{ stats.projects }}</div>
+        <div class="stat-label">Projects</div>
+      </a>
+      <a class="stat-card" routerLink="/tasks">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">{{ stats.tasks }}</div>
+        <div class="stat-label">Tasks</div>
+      </a>
+      <a class="stat-card" routerLink="/users">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">{{ stats.users }}</div>
+        <div class="stat-label">Users</div>
+      </a>
+    </div>
+    <div class="quick-nav">
+      <h2>Quick access</h2>
+      <div class="quick-grid">
+        <a class="quick-card" routerLink="/projects">
+          <span class="quick-icon">📁</span>
+          <span class="quick-title">Manage Projects</span>
+          <span class="quick-sub">Create, update, delete projects</span>
+        </a>
+        <a class="quick-card" routerLink="/tasks">
+          <span class="quick-icon">📋</span>
+          <span class="quick-title">Work Tasks</span>
+          <span class="quick-sub">Assign and track tasks by priority</span>
+        </a>
+        <a class="quick-card" routerLink="/users">
+          <span class="quick-icon">👤</span>
+          <span class="quick-title">Team Members</span>
+          <span class="quick-sub">View and manage users</span>
+        </a>
+        <a class="quick-card" routerLink="/products">
+          <span class="quick-icon">📦</span>
+          <span class="quick-title">Products</span>
+          <span class="quick-sub">Browse and manage products</span>
+        </a>
+      </div>
+    </div>
+  }
+</div>

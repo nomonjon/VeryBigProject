@@ -11,5 +11,6 @@ public interface IUserService
     Task<Result<UserDto>> CreateUserAsync(CreateUpdateUserDto newUser, CancellationToken cancellationToken);
     Task<Result<UserDto>> UpdateUserAsync(Guid id, CreateUpdateUserDto updatedUser, CancellationToken cancellationToken);
     Task<Result<UserDto>> UpdatePartly(Guid id, CreateUpdateUserDto updatedUser, CancellationToken cancellationToken);
+    Task<Result<UserDto>> UpdateRoleAsync(Guid id, UpdateUserRoleDto updatedUserRole, CancellationToken cancellationToken);
     Task<Result<bool>> DeleteUserAsync(Guid id, CancellationToken cancellationToken);
 }

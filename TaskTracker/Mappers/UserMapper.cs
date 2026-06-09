@@ -12,6 +12,7 @@ public static class UserMapper
             user.FullName,
             user.Email,
             user.Position,
+            user.Role,
             user.WorkTasks?.Select(wt => wt.ToWorkTaskDto()).ToList() ?? new List<WorkTaskDto>()
         );
     }

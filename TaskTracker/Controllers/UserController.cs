@@ -83,6 +83,23 @@ public class UserController(IUserService userService) : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    [HttpPatch("{id:guid}/role")]
+    public async Task<IActionResult> UpdateUserRole([FromRoute] Guid id, [FromBody] UpdateUserRoleDto updatedUserRole, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var user = await userService.UpdateRoleAsync(id, updatedUserRole, cancellationToken);
+            return user.ToResponse();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteUser(Guid id, CancellationToken cancellationToken)

@@ -1,0 +1,65 @@
+<div class="page-header">
+  <h1>Projects</h1>
+  <button class="btn btn-primary" (click)="openCreate()">+ New Project</button>
+</div>
+
+@if (loading) {
+  <div class="loading-wrap"><span class="spinner"></span></div>
+} @else {
+  @if (projects.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📁</div>
+      <p>No projects yet. Create your first one!</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th><th>Description</th><th>Tasks</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of projects; track p.id) {
+            <tr>
+              <td><strong>{{ p.name }}</strong></td>
+              <td class="muted">{{ p.description }}</td>
+              <td><span class="badge badge-user">{{ p.workTasks?.length || 0 }} tasks</span></td>
+              <td>
+                <div class="actions">
+                  <button class="btn btn-ghost btn-sm" (click)="openEdit(p)">Edit</button>
+                  <button class="btn btn-danger btn-sm" (click)="delete(p.id)">Delete</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}
+
+@if (showModal) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ editingId ? 'Edit Project' : 'New Project' }}</h2>
+      @if (error) { <div class="error-msg">{{ error }}</div> }
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label>Name</label>
+          <input class="form-control" type="text" formControlName="name" placeholder="Project name" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-control" formControlName="description" rows="3" placeholder="What is this project about?"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="submitting">
+            @if (submitting) { <span class="spinner"></span> } @else { {{ editingId ? 'Save' : 'Create' }} }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

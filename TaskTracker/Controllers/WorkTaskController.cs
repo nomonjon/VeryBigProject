@@ -3,10 +3,13 @@ using TaskTracker.Dtos;
 using TaskTracker.Interfaces;
 using KeyNotFoundException = System.Collections.Generic.KeyNotFoundException;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace TaskTracker.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize] // All endpoints require authentication by default
 public class WorkTaskController : ControllerBase
 {
     private readonly IWorkTaskService _workTaskService;
@@ -46,6 +49,7 @@ public class WorkTaskController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> UpdateTask(Guid id, CreateUpdateWorkTaskDto updatedTask, CancellationToken cancellationToken)
     {
         var task = await _workTaskService.UpdateWorkTaskAsync(id, updatedTask, cancellationToken);
@@ -54,6 +58,7 @@ public class WorkTaskController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteTask(Guid id, CancellationToken cancellationToken)
     {
         var deleted = await _workTaskService.DeleteWorkTaskAsync(id, cancellationToken);

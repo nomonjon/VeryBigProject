@@ -1,0 +1,100 @@
+<div class="page-header">
+  <h1>Work Tasks</h1>
+  <button class="btn btn-primary" (click)="openCreate()">+ New Task</button>
+</div>
+
+@if (loading) {
+  <div class="loading-wrap"><span class="spinner"></span></div>
+} @else {
+  @if (tasks.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>No tasks yet.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th><th>Description</th><th>Priority</th><th>Project</th><th>Assignee</th>
+            @if (currentUserRole === 'Admin' || currentUserRole === 'Manager') {
+              <th>Actions</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of tasks; track t.id) {
+            <tr>
+              <td><strong>{{ t.name }}</strong></td>
+              <td class="muted">{{ t.description }}</td>
+              <td><span class="badge" [class]="priorityClass(t.priority)">{{ priorityLabel(t.priority) }}</span></td>
+              <td>{{ projectName(t.projectId) }}</td>
+              <td>{{ assigneeName(t.assigneeId) }}</td>
+              @if (currentUserRole === 'Admin' || currentUserRole === 'Manager') {
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-ghost btn-sm" (click)="openEdit(t)">Edit</button>
+                    @if (currentUserRole === 'Admin') {
+                      <button class="btn btn-danger btn-sm" (click)="delete(t.id)">Delete</button>
+                    }
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}
+
+@if (showModal) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ editingId ? 'Edit Task' : 'New Task' }}</h2>
+      @if (error) { <div class="error-msg">{{ error }}</div> }
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label>Name</label>
+          <input class="form-control" type="text" formControlName="name" placeholder="Task name" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-control" formControlName="description" rows="2" placeholder="Details…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select class="form-control" formControlName="priority">
+            @for (p of priorities; track p.value) {
+              <option [value]="p.value">{{ p.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Project</label>
+          <select class="form-control" formControlName="projectId">
+            <option value="">— Select project —</option>
+            @for (p of projects; track p.id) {
+              <option [value]="p.id">{{ p.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Assignee (optional)</label>
+          <select class="form-control" formControlName="assigneeId">
+            <option [value]="null">— Unassigned —</option>
+            @for (u of users; track u.id) {
+              <option [value]="u.id">{{ u.fullName }}</option>
+            }
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="submitting">
+            @if (submitting) { <span class="spinner"></span> } @else { {{ editingId ? 'Save' : 'Create' }} }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
