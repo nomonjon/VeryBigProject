@@ -1,6 +1,8 @@
 <div class="page-header">
   <h1>Work Tasks</h1>
-  <button class="btn btn-primary" (click)="openCreate()">+ New Task</button>
+  @if (canCreateTask) {
+    <button class="btn btn-primary" (click)="openCreate()">+ New Task</button>
+  }
 </div>
 
 @if (loading) {
@@ -16,10 +18,8 @@
       <table>
         <thead>
           <tr>
-            <th>Name</th><th>Description</th><th>Priority</th><th>Project</th><th>Assignee</th>
-            @if (currentUserRole === 'Admin' || currentUserRole === 'Manager') {
-              <th>Actions</th>
-            }
+            <th>Name</th><th>Description</th><th>Priority</th><th>Status</th><th>Project</th><th>Assignee</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -28,18 +28,17 @@
               <td><strong>{{ t.name }}</strong></td>
               <td class="muted">{{ t.description }}</td>
               <td><span class="badge" [class]="priorityClass(t.priority)">{{ priorityLabel(t.priority) }}</span></td>
+              <td><span class="badge badge-status">{{ statusLabel(t.status) }}</span></td>
               <td>{{ projectName(t.projectId) }}</td>
               <td>{{ assigneeName(t.assigneeId) }}</td>
-              @if (currentUserRole === 'Admin' || currentUserRole === 'Manager') {
-                <td>
-                  <div class="actions">
-                    <button class="btn btn-ghost btn-sm" (click)="openEdit(t)">Edit</button>
-                    @if (currentUserRole === 'Admin') {
-                      <button class="btn btn-danger btn-sm" (click)="delete(t.id)">Delete</button>
-                    }
-                  </div>
-                </td>
-              }
+              <td>
+                <div class="actions">
+                  <button class="btn btn-ghost btn-sm" (click)="openDetails(t)">Details</button>
+                  <button class="btn btn-ghost btn-sm" (click)="openStatus(t)">Status</button>
+                  <button class="btn btn-ghost btn-sm" (click)="openEdit(t)">Edit</button>
+                  <button class="btn btn-danger btn-sm" (click)="delete(t.id)">Delete</button>
+                </div>
+              </td>
             </tr>
           }
         </tbody>
@@ -66,25 +65,33 @@
           <label>Priority</label>
           <select class="form-control" formControlName="priority">
             @for (p of priorities; track p.value) {
-              <option [value]="p.value">{{ p.label }}</option>
+              <option [ngValue]="p.value">{{ p.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select class="form-control" formControlName="status">
+            @for (s of statuses; track s.value) {
+              <option [ngValue]="s.value">{{ s.label }}</option>
             }
           </select>
         </div>
         <div class="form-group">
           <label>Project</label>
           <select class="form-control" formControlName="projectId">
-            <option value="">— Select project —</option>
+            <option [ngValue]="null">— Select project —</option>
             @for (p of projects; track p.id) {
-              <option [value]="p.id">{{ p.name }}</option>
+              <option [ngValue]="p.id">{{ p.name }}</option>
             }
           </select>
         </div>
         <div class="form-group">
           <label>Assignee (optional)</label>
           <select class="form-control" formControlName="assigneeId">
-            <option [value]="null">— Unassigned —</option>
+            <option [ngValue]="null">— Unassigned —</option>
             @for (u of users; track u.id) {
-              <option [value]="u.id">{{ u.fullName }}</option>
+              <option [ngValue]="u.id">{{ u.fullName }}</option>
             }
           </select>
         </div>
@@ -95,6 +102,82 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+}
+
+@if (showStatusModal && statusEditingTask) {
+  <div class="modal-overlay" (click)="closeStatusModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Update Status — {{ statusEditingTask.name }}</h2>
+      <div class="form-group">
+        <label>Status</label>
+        <select class="form-control" [(ngModel)]="pendingStatus">
+          @for (s of statuses; track s.value) {
+            <option [ngValue]="s.value">{{ s.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" (click)="closeStatusModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="submitting" (click)="submitStatus()">
+          @if (submitting) { <span class="spinner"></span> } @else { Save }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDetailsModal && viewingTask) {
+  <div class="modal-overlay" (click)="closeDetailsModal()">
+    <div class="modal details-modal" (click)="$event.stopPropagation()">
+      <h2>Task Details: {{ viewingTask.name }}</h2>
+      <div class="task-info">
+        <p><strong>Description:</strong> {{ viewingTask.description }}</p>
+        <p><strong>Priority:</strong> {{ priorityLabel(viewingTask.priority) }}</p>
+        <p><strong>Status:</strong> {{ statusLabel(viewingTask.status) }}</p>
+        <p><strong>Assignee:</strong> {{ assigneeName(viewingTask.assigneeId) }}</p>
+        <p><strong>Project:</strong> {{ projectName(viewingTask.projectId) }}</p>
+      </div>
+
+      <h3>Comments</h3>
+      <div class="comments-section" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+        @if (!viewingTask.comments || viewingTask.comments.length === 0) {
+          <p class="muted">No comments yet.</p>
+        } @else {
+          @for (c of viewingTask.comments; track c.id) {
+            <div class="comment" style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+              <p style="margin: 0;"><strong>{{ assigneeName(c.userId) }}</strong> <span class="muted" style="font-size: 0.85em;">({{ c.createdAt | date:'short' }})</span></p>
+              <p style="margin: 5px 0 0 0;">{{ c.content }}</p>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="add-comment" style="display: flex; flex-direction: column;">
+        <textarea class="form-control" [(ngModel)]="newComment" placeholder="Add a comment..."></textarea>
+        <button class="btn btn-primary btn-sm" style="margin-top: 10px; align-self: flex-start;" (click)="submitComment()">Post Comment</button>
+      </div>
+
+      <h3 style="margin-top: 20px;">History</h3>
+      <div class="history-section" style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+        @if (!viewingTask.history || viewingTask.history.length === 0) {
+          <p class="muted">No history.</p>
+        } @else {
+          <ul style="padding-left: 20px; margin: 0;">
+            @for (h of viewingTask.history; track h.id) {
+              <li style="margin-bottom: 5px; font-size: 0.9em;">
+                <strong>{{ assigneeName(h.userId) }}</strong> changed <em>{{ h.fieldName }}</em>
+                from '{{ h.oldValue }}' to '{{ h.newValue }}' on {{ h.changedAt | date:'short' }}
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="modal-footer" style="margin-top: 20px;">
+        <button type="button" class="btn btn-ghost" (click)="closeDetailsModal()">Close</button>
+      </div>
     </div>
   </div>
 }

@@ -1,6 +1,8 @@
 <div class="page-header">
   <h1>Projects</h1>
-  <button class="btn btn-primary" (click)="openCreate()">+ New Project</button>
+  @if (isAdmin) {
+    <button class="btn btn-primary" (click)="openCreate()">+ New Project</button>
+  }
 </div>
 
 @if (loading) {
@@ -9,14 +11,14 @@
   @if (projects.length === 0) {
     <div class="empty-state">
       <div class="empty-icon">📁</div>
-      <p>No projects yet. Create your first one!</p>
+      <p>No projects yet.</p>
     </div>
   } @else {
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Name</th><th>Description</th><th>Tasks</th><th>Actions</th>
+            <th>Name</th><th>Description</th><th>Members</th><th>Tasks</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -24,11 +26,16 @@
             <tr>
               <td><strong>{{ p.name }}</strong></td>
               <td class="muted">{{ p.description }}</td>
+              <td class="muted">{{ getMemberNames(p.userIds) }}</td>
               <td><span class="badge badge-user">{{ p.workTasks?.length || 0 }} tasks</span></td>
               <td>
                 <div class="actions">
-                  <button class="btn btn-ghost btn-sm" (click)="openEdit(p)">Edit</button>
-                  <button class="btn btn-danger btn-sm" (click)="delete(p.id)">Delete</button>
+                  <button class="btn btn-ghost btn-sm" (click)="openDetails(p)">Details</button>
+                  @if (isAdmin) {
+                    <button class="btn btn-ghost btn-sm" (click)="openMembers(p)">Members</button>
+                    <button class="btn btn-ghost btn-sm" (click)="openEdit(p)">Edit</button>
+                    <button class="btn btn-danger btn-sm" (click)="delete(p.id)">Delete</button>
+                  }
                 </div>
               </td>
             </tr>
@@ -60,6 +67,105 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+}
+
+@if (showDetailsModal && viewingProject) {
+  <div class="modal-overlay" (click)="closeDetails()">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ viewingProject.name }}</h2>
+        <button class="btn btn-ghost btn-sm" (click)="closeDetails()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <p class="muted">{{ viewingProject.description || '—' }}</p>
+      </div>
+
+      <div class="form-group">
+        <label>Members ({{ viewingProject.userIds?.length || 0 }})</label>
+        @if (!viewingProject.userIds?.length) {
+          <p class="muted">No members assigned.</p>
+        } @else {
+          <ul class="detail-list">
+            @for (uid of viewingProject.userIds; track uid) {
+              <li>{{ userMap.get(uid) ?? uid }}</li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Tasks ({{ viewingProject.workTasks?.length || 0 }})</label>
+        @if (!viewingProject.workTasks?.length) {
+          <p class="muted">No tasks in this project.</p>
+        } @else {
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Priority</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              @for (t of viewingProject.workTasks; track t.id) {
+                <tr>
+                  <td>{{ t.name }}</td>
+                  <td><span class="badge">{{ priorityLabel(t.priority) }}</span></td>
+                  <td><span class="badge">{{ statusLabel(t.status) }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="closeDetails()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showMembersModal && managingProject) {
+  <div class="modal-overlay" (click)="closeMembers()">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Members — {{ managingProject.name }}</h2>
+        <button class="btn btn-ghost btn-sm" (click)="closeMembers()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Current Members ({{ managingProject.userIds?.length || 0 }})</label>
+        @if (!managingProject.userIds?.length) {
+          <p class="muted">No members assigned yet.</p>
+        } @else {
+          <ul class="detail-list">
+            @for (uid of managingProject.userIds; track uid) {
+              <li style="display:flex; justify-content:space-between; align-items:center;">
+                <span>{{ userMap.get(uid) ?? uid }}</span>
+                <button class="btn btn-danger btn-sm" (click)="removeMember(uid)">Remove</button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Add Member</label>
+        <div style="display:flex; gap:0.5rem;">
+          <select class="form-control" [(ngModel)]="memberToAddId" style="flex:1;">
+            <option [ngValue]="null">— Select a user —</option>
+            @for (u of nonMembers(); track u.id) {
+              <option [ngValue]="u.id">{{ u.fullName }} ({{ u.email }})</option>
+            }
+          </select>
+          <button class="btn btn-primary" [disabled]="!memberToAddId" (click)="addMember()">Add</button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="closeMembers()">Close</button>
+      </div>
     </div>
   </div>
 }

@@ -3,14 +3,10 @@
   <a class="nav-logo" routerLink="/dashboard">TaskTracker</a>
   <div class="nav-links">
     <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    @if (user.role === 'Admin' || user.role === 'Manager') {
-      <a routerLink="/projects" routerLinkActive="active">Projects</a>
-    }
+    <a routerLink="/projects" routerLinkActive="active">Projects</a>
     <a routerLink="/tasks" routerLinkActive="active">Tasks</a>
     @if (user.role === 'Admin') {
       <a routerLink="/users" routerLinkActive="active">Users</a>
-    }
-    @if (user.role === 'Admin' || user.role === 'Manager') {
       <a routerLink="/products" routerLinkActive="active">Products</a>
     }
   </div>

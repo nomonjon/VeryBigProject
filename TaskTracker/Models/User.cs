@@ -10,4 +10,5 @@ public class User : BaseEntity
     public string Role { get; set; } = string.Empty;
 
     public List<WorkTask> WorkTasks { get; set; } = [];
+    public List<Project> Projects { get; set; } = [];
 }

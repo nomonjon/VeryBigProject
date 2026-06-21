@@ -5,8 +5,20 @@ using TaskTracker.Models;
 
 namespace TaskTracker.Services;
 
-public class ProjectService(IProjectRepository projectRepo, ILogger<ProjectService> logger) : IProjectService
+public class ProjectService(
+    IProjectRepository projectRepo,
+    IUserRepository userRepo,
+    IHttpContextAccessor httpContextAccessor,
+    ILogger<ProjectService> logger) : IProjectService
 {
+    private (Guid userId, string? role) GetCurrentUser()
+    {
+        var claims = httpContextAccessor.HttpContext?.User;
+        var role = claims?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+        Guid.TryParse(claims?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var userId);
+        return (userId, role);
+    }
+
     public async Task<Result<ProjectDto>> CreateProjectAsync(CreateUpdateProjectDto newProject, CancellationToken cancellationToken)
     {
         
@@ -72,21 +84,27 @@ public class ProjectService(IProjectRepository projectRepo, ILogger<ProjectServi
 
     public async Task<List<ProjectDto>> GetProjectsAsync(CancellationToken cancellationToken)
     {
-        
-        var projects = await projectRepo.GetAll(cancellationToken);
+        var (userId, role) = GetCurrentUser();
+
+        var projects = await projectRepo.GetAllWithUsers(cancellationToken);
+        if (role != Roles.Admin)
+            projects = projects.Where(p => p.Users.Any(u => u.Id == userId)).ToList();
+
         var result = projects.Select(p => p.ToProjectDto()).ToList();
-        
         logger.LogInformation("Retrieved {ProjectCount} projects", result.Count);
         return result;
     }
 
-    public async Task<List<Project>> GetProjectsWithIdAsync(CancellationToken cancellationToken)
+    public async Task<List<ProjectWithIdDto>> GetProjectsWithIdAsync(CancellationToken cancellationToken)
     {
-        
-        var projects = await projectRepo.GetAll(cancellationToken);
+        var (userId, role) = GetCurrentUser();
+
+        var projects = await projectRepo.GetAllWithUsers(cancellationToken);
+        if (role != Roles.Admin)
+            projects = projects.Where(p => p.Users.Any(u => u.Id == userId)).ToList();
+
         logger.LogInformation("Retrieved {ProjectCount} projects with IDs", projects.Count);
-        
-        return projects;
+        return projects.Select(p => p.ToProjectWithIdDto()).ToList();
     }
 
     public async Task<Result<ProjectDto>> UpdateProjectAsync(Guid id, CreateUpdateProjectDto updatedProject, CancellationToken cancellationToken)
@@ -113,5 +131,40 @@ public class ProjectService(IProjectRepository projectRepo, ILogger<ProjectServi
 
         logger.LogInformation("Project updated successfully with ID: {ProjectId}", id);
         return Result<ProjectDto>.Success(newProject.ToProjectDto());
+    }
+
+    public async Task<Result<bool>> AddUserToProjectAsync(Guid projectId, Guid userId, CancellationToken cancellationToken)
+    {
+        var project = await projectRepo.GetByIdWithUsers(projectId, cancellationToken);
+        if (project is null)
+            return Result<bool>.Failure(Error.NotFound);
+
+        if (project.Users.Any(u => u.Id == userId))
+            return Result<bool>.Success(true); // already assigned
+
+        var user = await userRepo.GetById(userId, cancellationToken);
+        if (user is null)
+            return Result<bool>.Failure(Error.NotFound);
+
+        project.Users.Add(user);
+        await projectRepo.Update(project, cancellationToken);
+        logger.LogInformation("User {UserId} added to project {ProjectId}", userId, projectId);
+        return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<bool>> RemoveUserFromProjectAsync(Guid projectId, Guid userId, CancellationToken cancellationToken)
+    {
+        var project = await projectRepo.GetByIdWithUsers(projectId, cancellationToken);
+        if (project is null)
+            return Result<bool>.Failure(Error.NotFound);
+
+        var user = project.Users.FirstOrDefault(u => u.Id == userId);
+        if (user is null)
+            return Result<bool>.Success(true); // already not in project
+
+        project.Users.Remove(user);
+        await projectRepo.Update(project, cancellationToken);
+        logger.LogInformation("User {UserId} removed from project {ProjectId}", userId, projectId);
+        return Result<bool>.Success(true);
     }
 }

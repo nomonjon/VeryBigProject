@@ -50,9 +50,10 @@ public class UserService(IUserRepository userRepo, IOptions<DbConection> _conect
 
     }
 
-    public async Task<List<User>> GetUsersWithIdAsync(CancellationToken cancellationToken)
+    public async Task<List<UserWithIdDto>> GetUsersWithIdAsync(CancellationToken cancellationToken)
     {
-        return await userRepo.GetAll(cancellationToken);
+        var users = await userRepo.GetAll(cancellationToken);
+        return users.Select(u => u.ToUserWithIdDto()).ToList();
     }
 
     public async Task<Result<UserDto>> UpdateUserAsync(Guid id, CreateUpdateUserDto updatedUser, CancellationToken cancellationToken)

@@ -7,6 +7,27 @@ namespace TaskTracker.Repository;
 
 public class WorkTaskRepository(AppDbContext context) : BaseRepository<WorkTask>(context), IWorkTaskRepository
 {
+    public new async Task<WorkTask?> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        return await context.WorkTasks
+            .Include(wt => wt.Project).ThenInclude(p => p.Users)
+            .Include(wt => wt.Assignee)
+            .Include(wt => wt.Comments)
+            .Include(wt => wt.History)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(wt => wt.Id == id, cancellationToken);
+    }
+
+    public new async Task<List<WorkTask>> GetAll(CancellationToken cancellationToken)
+    {
+        return await context.WorkTasks
+            .Include(wt => wt.Project).ThenInclude(p => p.Users)
+            .Include(wt => wt.Assignee)
+            .Include(wt => wt.Comments)
+            .Include(wt => wt.History)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
     //public async Task<WorkTask> CreateTask(WorkTask newTask, CancellationToken cancellationToken)
     //{
     //    await context.WorkTasks.AddAsync(newTask, cancellationToken);

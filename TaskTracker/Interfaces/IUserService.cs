@@ -6,7 +6,7 @@ namespace TaskTracker.Interfaces;
 public interface IUserService
 {
     Task<List<UserDto>> GetUsersAsync(CancellationToken cancellationToken);
-    Task<List<User>> GetUsersWithIdAsync(CancellationToken cancellationToken);
+    Task<List<UserWithIdDto>> GetUsersWithIdAsync(CancellationToken cancellationToken);
     Task<Result<UserDto>> GetUserByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Result<UserDto>> CreateUserAsync(CreateUpdateUserDto newUser, CancellationToken cancellationToken);
     Task<Result<UserDto>> UpdateUserAsync(Guid id, CreateUpdateUserDto updatedUser, CancellationToken cancellationToken);

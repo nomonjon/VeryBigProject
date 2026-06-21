@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TaskTracker.Data;
 using TaskTracker.Models;
 
@@ -8,36 +8,49 @@ public class Query
 {
     [UseFiltering]
     [UseSorting]
-    public IQueryable<Project> GetProjects([Service] AppDbContext context)
+    public IQueryable<Project> GetProjects([Service] AppDbContext context, [Service] IHttpContextAccessor httpContextAccessor)
     {
-        return context.Projects.Include(p => p.WorkTasks);
+        var userIdStr = httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return Enumerable.Empty<Project>().AsQueryable();
+
+        return context.Projects.Include(p => p.WorkTasks).Where(p => p.Users.Any(u => u.Id == userId));
     }
 
-    public Project? GetProjectById(Guid id,[Service]  AppDbContext context)
+    public Project? GetProjectById(Guid id,[Service]  AppDbContext context, [Service] IHttpContextAccessor httpContextAccessor)
     {
-        return context.Projects.Include(p => p.WorkTasks).FirstOrDefault(p => p.Id == id);
+        var userIdStr = httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return null;
+
+        return context.Projects.Include(p => p.WorkTasks).FirstOrDefault(p => p.Id == id && p.Users.Any(u => u.Id == userId));
     }
 
     
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<WorkTask> GetWorkTasks([Service] AppDbContext context)
+    public IQueryable<WorkTask> GetWorkTasks([Service] AppDbContext context, [Service] IHttpContextAccessor httpContextAccessor)
     {
+        var userIdStr = httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return Enumerable.Empty<WorkTask>().AsQueryable();
+
         return context.WorkTasks
                     .Include(wt => wt.Project)
-                    .Include(wt => wt.Assignee);
+                    .Include(wt => wt.Assignee)
+                    .Where(wt => wt.Project != null && wt.Project.Users.Any(u => u.Id == userId));
     }
 
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public WorkTask? GetWorkTasksById(Guid id, [Service] AppDbContext context)
+    public WorkTask? GetWorkTasksById(Guid id, [Service] AppDbContext context, [Service] IHttpContextAccessor httpContextAccessor)
     {
+        var userIdStr = httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return null;
+
         return context.WorkTasks
             .Include(wt => wt.Project)
             .Include(wt => wt.Assignee)
-            .FirstOrDefault(p => p.Id == id);
+            .FirstOrDefault(p => p.Id == id && p.Project != null && p.Project.Users.Any(u => u.Id == userId));
     }
 
     [UseProjection]

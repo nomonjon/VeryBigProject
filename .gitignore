@@ -1,0 +1,35 @@
+# .NET build output
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+*.user
+
+# Visual Studio
+.vs/
+*.suo
+*.userprefs
+
+# Rider
+.idea/
+
+# Test results
+[Tt]est[Rr]esults/
+*.coverage
+coverage/
+
+# Angular / Node
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+*.env
+appsettings.*.local.json
+
+# Claude local settings
+.claude/settings.local.json

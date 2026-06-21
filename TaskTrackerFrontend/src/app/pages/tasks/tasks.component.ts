@@ -5,9 +5,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 
 import {
   ReactiveFormsModule,
+  FormsModule,
   FormBuilder,
   Validators
 } from '@angular/forms';
@@ -27,13 +29,14 @@ import {
   CreateUpdateWorkTaskDto,
   ProjectWithIdDto,
   UserWithIdDto,
-  Priority
+  Priority,
+  Status
 } from '../../models';
 
 @Component({
   selector: 'app-tasks',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FormsModule, DatePipe],
   templateUrl: './tasks.component.html',
   styleUrls: ['./tasks.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -45,7 +48,7 @@ export class TasksComponent implements OnInit {
   private userSvc = inject(UserService);
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
-  private cdr = inject(ChangeDetectorRef); // 👈
+  private cdr = inject(ChangeDetectorRef);
 
   tasks: WorkTaskWithIdDto[] = [];
   projects: ProjectWithIdDto[] = [];
@@ -53,13 +56,23 @@ export class TasksComponent implements OnInit {
 
   loading = false;
   showModal = false;
+  showStatusModal = false;
   submitting = false;
 
   editingId: string | null = null;
+  statusEditingTask: WorkTaskWithIdDto | null = null;
+  pendingStatus: Status = Status.InProgress;
   error = '';
-  get currentUserRole() { return this.auth.currentUser?.role; }
+
+  get isAdmin(): boolean { return this.auth.isAdmin(); }
+  get canCreateTask(): boolean { return this.isAdmin || this.projects.length > 0; }
+
+  viewingTask: WorkTaskWithIdDto | null = null;
+  showDetailsModal = false;
+  newComment = '';
 
   Priority = Priority;
+  Status = Status;
 
   priorities = [
     { label: 'Low', value: Priority.Low },
@@ -67,11 +80,34 @@ export class TasksComponent implements OnInit {
     { label: 'High', value: Priority.High },
   ];
 
+  statuses = [
+    { label: 'In Progress', value: Status.InProgress },
+    { label: 'Review',      value: Status.Review },
+    { label: 'Canceled',    value: Status.Canceled },
+    { label: 'Done',        value: Status.Done },
+  ];
+
+  private static readonly PRIORITY_LABELS = ['Low', 'Medium', 'High'];
+  private static readonly STATUS_LABELS = ['In Progress', 'Review', 'Canceled', 'Done'];
+
+  private toStatusIndex(value: Status | string | number): number {
+    return typeof value === 'number' ? value : Status[value as keyof typeof Status];
+  }
+
+  private toPriorityIndex(value: Priority | string | number): number {
+    return typeof value === 'number' ? value : Priority[value as keyof typeof Priority];
+  }
+
+  statusLabel(status: Status | string | number): string {
+    return TasksComponent.STATUS_LABELS[this.toStatusIndex(status)] ?? String(status);
+  }
+
   form = this.fb.group({
     name: ['', Validators.required],
     description: ['', Validators.required],
     priority: [Priority.Low, Validators.required],
-    projectId: ['', Validators.required],
+    status: [Status.InProgress, Validators.required],
+    projectId: [null as string | null, Validators.required],
     assigneeId: [null as string | null],
   });
 
@@ -92,7 +128,7 @@ export class TasksComponent implements OnInit {
     .pipe(
       finalize(() => {
         this.loading = false;
-        this.cdr.markForCheck(); // 👈
+        this.cdr.markForCheck();
       })
     )
     .subscribe({
@@ -100,21 +136,21 @@ export class TasksComponent implements OnInit {
         this.tasks = data.tasks;
         this.projects = data.projects;
         this.users = data.users;
-        this.cdr.markForCheck(); // 👈
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Tasks load error', err);
-        this.cdr.markForCheck(); // 👈
+        this.cdr.markForCheck();
       }
     });
   }
 
-  priorityLabel(priority: Priority): string {
-    return Priority[priority];
+  priorityLabel(priority: Priority | string | number): string {
+    return TasksComponent.PRIORITY_LABELS[this.toPriorityIndex(priority)] ?? String(priority);
   }
 
-  priorityClass(priority: Priority): string {
-    return ['badge-low', 'badge-medium', 'badge-high'][priority] || 'badge-low';
+  priorityClass(priority: Priority | string | number): string {
+    return ['badge-low', 'badge-medium', 'badge-high'][this.toPriorityIndex(priority)] || 'badge-low';
   }
 
   projectName(id: string): string {
@@ -128,7 +164,7 @@ export class TasksComponent implements OnInit {
 
   openCreate(): void {
     this.editingId = null;
-    this.form.reset({ priority: Priority.Low, assigneeId: null });
+    this.form.reset({ priority: Priority.Low, status: Status.InProgress, assigneeId: null });
     this.error = '';
     this.showModal = true;
   }
@@ -138,7 +174,8 @@ export class TasksComponent implements OnInit {
     this.form.patchValue({
       name: task.name,
       description: task.description,
-      priority: task.priority,
+      priority: this.toPriorityIndex(task.priority),
+      status: this.toStatusIndex(task.status),
       projectId: task.projectId,
       assigneeId: task.assigneeId
     });
@@ -151,6 +188,83 @@ export class TasksComponent implements OnInit {
     this.form.reset();
     this.editingId = null;
     this.error = '';
+  }
+
+  openStatus(task: WorkTaskWithIdDto): void {
+    this.statusEditingTask = task;
+    this.pendingStatus = this.toStatusIndex(task.status);
+    this.showStatusModal = true;
+  }
+
+  closeStatusModal(): void {
+    this.showStatusModal = false;
+    this.statusEditingTask = null;
+  }
+
+  submitStatus(): void {
+    if (!this.statusEditingTask || this.submitting) return;
+    if (this.pendingStatus === this.toStatusIndex(this.statusEditingTask.status)) {
+      this.closeStatusModal();
+      return;
+    }
+    const id = this.statusEditingTask.id;
+    this.submitting = true;
+    this.svc.updateStatus(id, this.pendingStatus)
+      .pipe(finalize(() => {
+        this.submitting = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+        next: (updated) => {
+          const idx = this.tasks.findIndex(t => t.id === id);
+          if (idx >= 0) this.tasks[idx] = { ...this.tasks[idx], status: updated.status };
+          this.closeStatusModal();
+        },
+        error: (err) => console.error(err)
+      });
+  }
+
+  openDetails(task: WorkTaskWithIdDto): void {
+    this.viewingTask = task;
+    this.newComment = '';
+    this.showDetailsModal = true;
+  }
+
+  closeDetailsModal(): void {
+    this.showDetailsModal = false;
+    this.viewingTask = null;
+    this.newComment = '';
+  }
+
+  submitComment(): void {
+    if (!this.newComment.trim() || !this.viewingTask) return;
+    const taskId = this.viewingTask.id;
+    const currentViewingId = taskId;
+    this.svc.addComment(taskId, this.newComment.trim()).subscribe({
+      next: () => {
+        this.newComment = '';
+        forkJoin({
+          tasks: this.svc.getAllWithId(),
+          projects: this.projSvc.getAllWithId(),
+          users: this.userSvc.getAllWithId(),
+        }).subscribe({
+          next: (data) => {
+            this.tasks = data.tasks;
+            this.projects = data.projects;
+            this.users = data.users;
+            const refreshed = this.tasks.find(t => t.id === currentViewingId);
+            if (refreshed) {
+              this.viewingTask = refreshed;
+            } else {
+              this.closeDetailsModal();
+            }
+            this.cdr.markForCheck();
+          },
+          error: (err) => console.error(err)
+        });
+      },
+      error: (err) => console.error(err)
+    });
   }
 
   submit(): void {
@@ -168,7 +282,7 @@ export class TasksComponent implements OnInit {
       .pipe(
         finalize(() => {
           this.submitting = false;
-          this.cdr.markForCheck(); // 👈
+          this.cdr.markForCheck();
         })
       )
       .subscribe({
@@ -179,7 +293,7 @@ export class TasksComponent implements OnInit {
         error: (err) => {
           console.error(err);
           this.error = err?.error?.message || 'Error saving task';
-          this.cdr.markForCheck(); // 👈
+          this.cdr.markForCheck();
         }
       });
   }
@@ -190,7 +304,7 @@ export class TasksComponent implements OnInit {
     this.svc.delete(id).subscribe({
       next: () => {
         this.tasks = this.tasks.filter(x => x.id !== id);
-        this.cdr.markForCheck(); // 👈
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);

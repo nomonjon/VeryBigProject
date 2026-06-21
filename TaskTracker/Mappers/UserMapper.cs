@@ -17,6 +17,19 @@ public static class UserMapper
         );
     }
 
+    public static UserWithIdDto ToUserWithIdDto(this User user)
+    {
+        return new UserWithIdDto
+        (
+            user.Id,
+            user.FullName,
+            user.Email,
+            user.Position,
+            user.Role,
+            user.WorkTasks?.Select(wt => wt.ToWorkTaskDto()).ToList() ?? new List<WorkTaskDto>()
+        );
+    }
+
     public static User ToUser(this CreateUpdateUserDto userDto)
     {
         return new User

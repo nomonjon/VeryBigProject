@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateUpdateWorkTaskDto, WorkTaskDto, WorkTaskWithIdDto } from '../models';
+import { CreateUpdateWorkTaskDto, Status, WorkTaskDto, WorkTaskWithIdDto } from '../models';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -29,7 +29,17 @@ export class WorkTaskService {
     return this.http.put<WorkTaskDto>(`${this.baseUrl}/${id}`, dto);
   }
 
+  updateStatus(id: string, status: Status): Observable<WorkTaskDto> {
+    return this.http.patch<WorkTaskDto>(`${this.baseUrl}/${id}/status`, { status });
+  }
+
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  addComment(id: string, content: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/${id}/comments`, `"${content}"`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
