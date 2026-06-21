@@ -11,6 +11,9 @@ public class WorkTask : BaseEntity
     public Project? Project { get; set; }
     public Guid? AssigneeId { get; set; }
     public User? Assignee { get; set; }
+
+    public List<TaskComment> Comments { get; set; } = [];
+    public List<TaskHistory> History { get; set; } = [];
 }
 public enum Status
 {

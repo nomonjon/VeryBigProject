@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TaskTracker;
 
@@ -21,6 +21,7 @@ public class Error
     public static readonly Error BadRequest = new("BadRequest", "Bad request", 400);
     public static readonly Error EmailTaken = new("EmailTaken", "Email already in use", 409);
     public static readonly Error InvalidCredentials = new("Auth.InvalidCredentials", "Invalid email or password", 401);
+    public static readonly Error Unauthorized = new("Auth.Unauthorized", "Authentication required", 401);
     public static readonly Error Forbidden = new("Auth.Forbidden", "Forbidden", 403);
 }
 

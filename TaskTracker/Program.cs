@@ -131,6 +131,7 @@ builder.Services.AddScoped<ProductApiService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddHttpContextAccessor();
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 builder.Services
@@ -154,12 +155,12 @@ builder.Services
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole(Roles.Admin));
-    options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole(Roles.Admin, Roles.Manager));
 });
 
 // ── GraphQL ───────────────────────────────────────────────────────────────────
 builder.Services
     .AddGraphQLServer()
+    .AddAuthorizationCore()
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
     .AddDataLoader<TasksByUserDataLoader>()

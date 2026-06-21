@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using NotificationService.Contracts;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -86,13 +86,14 @@ public class NotifierWorker(
 
                 if (@event is not null)
                 {
-                    logger.LogInformation(
-                        "[NOTIFICATION] Task '{Name}' (ID: {TaskId}) status changed: {OldStatus} → {NewStatus} at {ChangedAt:u}",
-                        @event.Name,
-                        @event.Id,
-                        @event.OldStatus,
-                        @event.NewStatus,
-                        @event.ChangedAt);
+                    foreach (var email in @event.ProjectUserEmails)
+                    {
+                        logger.LogInformation(
+                            "[NOTIFICATION to {Email}] In Project {ProjectName}, Task '{TaskName}' status has been changed.",
+                            email,
+                            @event.ProjectName,
+                            @event.Name);
+                    }
                 }
 
                 await channel.BasicAckAsync(ea.DeliveryTag, multiple: false);

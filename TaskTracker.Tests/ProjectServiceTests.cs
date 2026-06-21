@@ -1,10 +1,13 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.Xunit2;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using TaskTracker.Dtos;
@@ -19,6 +22,8 @@ namespace TaskTracker.Tests
     {
         private readonly IFixture _fixture;
         private readonly Mock<IProjectRepository> _projectRepoMock;
+        private readonly Mock<IUserRepository> _userRepoMock;
+        private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private readonly Mock<ILogger<ProjectService>> _loggerMock;
         private readonly ProjectService _sut;
 
@@ -28,8 +33,19 @@ namespace TaskTracker.Tests
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList().ForEach(b => _fixture.Behaviors.Remove(b));
             _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             _projectRepoMock = _fixture.Freeze<Mock<IProjectRepository>>();
+            _userRepoMock = _fixture.Freeze<Mock<IUserRepository>>();
             _loggerMock = _fixture.Freeze<Mock<ILogger<ProjectService>>>();
-            _sut = new ProjectService(_projectRepoMock.Object, _loggerMock.Object);
+            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+
+            var identity = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, Roles.Admin)
+            }, "TestAuth");
+            var ctx = new DefaultHttpContext { User = new ClaimsPrincipal(identity) };
+            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(ctx);
+
+            _sut = new ProjectService(_projectRepoMock.Object, _userRepoMock.Object, _httpContextAccessorMock.Object, _loggerMock.Object);
         }
 
         [Theory]
@@ -138,7 +154,7 @@ namespace TaskTracker.Tests
             // Arrange
             var projects = _fixture.CreateMany<Project>(3).ToList();
             _projectRepoMock
-                .Setup(repo => repo.GetAll(It.IsAny<CancellationToken>()))
+                .Setup(repo => repo.GetAllWithUsers(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(projects);
 
             // Act
@@ -147,7 +163,7 @@ namespace TaskTracker.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(3, result.Count);
-            _projectRepoMock.Verify(repo => repo.GetAll(It.IsAny<CancellationToken>()), Times.Once);
+            _projectRepoMock.Verify(repo => repo.GetAllWithUsers(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -156,7 +172,7 @@ namespace TaskTracker.Tests
             // Arrange
             var projects = _fixture.CreateMany<Project>(3).ToList();
             _projectRepoMock
-                .Setup(repo => repo.GetAll(It.IsAny<CancellationToken>()))
+                .Setup(repo => repo.GetAllWithUsers(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(projects);
 
             // Act
@@ -165,7 +181,7 @@ namespace TaskTracker.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(3, result.Count);
-            _projectRepoMock.Verify(repo => repo.GetAll(It.IsAny<CancellationToken>()), Times.Once);
+            _projectRepoMock.Verify(repo => repo.GetAllWithUsers(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]

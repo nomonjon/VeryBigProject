@@ -62,6 +62,7 @@ public class AuthService(IUserRepository userRepo, TokenService tokenService)
         var token = tokenService.GenerateToken(user);
 
         return Result<AuthResponseDto>.Success(new AuthResponseDto(
+            Id: user.Id,
             Token: token,
             Email: user.Email,
             FullName: user.FullName,
@@ -84,6 +85,7 @@ public class AuthService(IUserRepository userRepo, TokenService tokenService)
         var token = tokenService.GenerateToken(user);
 
         return Result<AuthResponseDto>.Success(new AuthResponseDto(
+            Id: user.Id,
             Token: token,
             Email: user.Email,
             FullName: user.FullName,

@@ -7,6 +7,8 @@ namespace TaskTracker.Dtos;
 
 public record UserDto(string FullName, string Email, string Position, string Role, List<WorkTaskDto> WorkTasks);
 
+public record UserWithIdDto(Guid Id, string FullName, string Email, string Position, string Role, List<WorkTaskDto> WorkTasks);
+
 public record CreateUpdateUserDto(string FullName, string Email, string Position);
 
 public record UpdateUserRoleDto(string Role);

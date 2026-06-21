@@ -11,5 +11,7 @@ public interface IWorkTaskService
     Task<(Project?, User?)> GetProjectAndUserAsync(Guid projectId,Guid userId, CancellationToken cancellationToken);
     Task<Result<WorkTaskDto>> CreateWorkTaskAsync(CreateUpdateWorkTaskDto newWorkTask, CancellationToken cancellationToken);
     Task<Result<WorkTaskDto>> UpdateWorkTaskAsync(Guid id, CreateUpdateWorkTaskDto updatedWorkTask, CancellationToken cancellationToken);
+    Task<Result<WorkTaskDto>> UpdateStatusAsync(Guid id, Status newStatus, CancellationToken cancellationToken);
     Task<Result<bool>> DeleteWorkTaskAsync(Guid id, CancellationToken cancellationToken);
+    Task<Result<TaskCommentDto>> AddCommentAsync(Guid taskId, string content, CancellationToken cancellationToken);
 }

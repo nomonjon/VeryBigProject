@@ -5,6 +5,13 @@ export enum Priority {
   High = 2,
 }
 
+export enum Status {
+  InProgress = 0,
+  Review = 1,
+  Canceled = 2,
+  Done = 3,
+}
+
 // ── Auth ─────────────────────────────────────────────────────────────────────
 export interface RegisterDto {
   fullName: string;
@@ -19,6 +26,7 @@ export interface LoginDto {
 }
 
 export interface AuthResponseDto {
+  id: string;
   token: string;
   email: string;
   fullName: string;
@@ -57,6 +65,7 @@ export interface ProjectDto {
 
 export interface ProjectWithIdDto extends ProjectDto {
   id: string;
+  userIds: string[];
 }
 
 export interface CreateUpdateProjectDto {
@@ -65,22 +74,44 @@ export interface CreateUpdateProjectDto {
 }
 
 // ── WorkTask ──────────────────────────────────────────────────────────────────
+export interface TaskCommentDto {
+  id: string;
+  workTaskId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface TaskHistoryDto {
+  id: string;
+  workTaskId: string;
+  userId: string;
+  fieldName: string;
+  oldValue: string;
+  newValue: string;
+  changedAt: string;
+}
+
 export interface WorkTaskDto {
+  id: string;
   name: string;
   description: string;
   priority: Priority;
+  status: Status;
   projectId: string;
   assigneeId: string | null;
+  comments?: TaskCommentDto[];
+  history?: TaskHistoryDto[];
 }
 
 export interface WorkTaskWithIdDto extends WorkTaskDto {
-  id: string;
 }
 
 export interface CreateUpdateWorkTaskDto {
   name: string;
   description: string;
   priority: Priority;
+  status: Status;
   projectId: string;
   assigneeId: string | null;
 }

@@ -53,6 +53,10 @@ export class AuthService {
     return this.currentUser?.role === 'Admin';
   }
 
+  get currentUserId(): string | null {
+    return this.currentUser?.id ?? null;
+  }
+
   private saveSession(res: AuthResponseDto): void {
     localStorage.setItem(this.TOKEN_KEY, res.token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(res));

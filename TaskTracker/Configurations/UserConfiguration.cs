@@ -18,5 +18,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasMany(u => u.WorkTasks)
                 .WithOne(wt => wt.Assignee)
                 .HasForeignKey(wt => wt.AssigneeId);
+
+        builder.HasMany(u => u.Projects)
+                .WithMany(p => p.Users)
+                .UsingEntity(j => j.ToTable("ProjectUsers"));
     }
 }

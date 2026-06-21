@@ -36,4 +36,12 @@ export class ProjectService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  addUser(projectId: string, userId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${projectId}/users/${userId}`, {});
+  }
+
+  removeUser(projectId: string, userId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${projectId}/users/${userId}`);
+  }
 }

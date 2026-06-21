@@ -44,6 +44,22 @@ public class ProjectRepository(AppDbContext context) : BaseRepository<Project>(c
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
+    public async Task<Project?> GetByIdWithUsers(Guid id, CancellationToken cancellationToken)
+    {
+        return await context.Projects
+            .Include(p => p.Users)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
+
+    public async Task<List<Project>> GetAllWithUsers(CancellationToken cancellationToken)
+    {
+        return await context.Projects
+            .AsNoTracking()
+            .Include(p => p.Users)
+            .Include(p => p.WorkTasks)
+            .ToListAsync(cancellationToken);
+    }
+
     //public async Task<List<Project>> GetProjects(CancellationToken cancellationToken)
     //{
     //    return await context.Projects
