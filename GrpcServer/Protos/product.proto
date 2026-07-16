@@ -48,4 +48,5 @@ message ProductResponse {
   string name = 2;
   double quantity = 3;
   double price = 4;
+  string status_color = 5;
 }

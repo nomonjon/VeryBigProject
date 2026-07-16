@@ -23,7 +23,8 @@ public class ProductGrpcService(IProductService productService, IProductReposito
             Id = p.Id.ToString(),
             Name = p.Name,
             Quantity = p.Quantity,
-            Price = (double)p.Price
+            Price = (double)p.Price,
+            StatusColor = p.StatusColor
         }));
 
         return response;
@@ -45,7 +46,8 @@ public class ProductGrpcService(IProductService productService, IProductReposito
             Id = product.Id.ToString(),
             Name = product.Name,
             Quantity = product.Quantity,
-            Price = (double)product.Price
+            Price = (double)product.Price,
+            StatusColor = product.StatusColor
         };
     }
 
@@ -64,25 +66,36 @@ public class ProductGrpcService(IProductService productService, IProductReposito
         //Code to convert dto to jston and box it into Htttpcontent
         var content = new StringContent(JsonSerializer.Serialize(priceRequestDto), Encoding.UTF8, "application/json");
 
-        var response = await client.PostAsync("api/Random/random-price", content);
-
-        var dto = new CreateUpdateProductDto();
-        if (response.IsSuccessStatusCode)
+        // The randomizer is an optional external service (not always reachable,
+        // e.g. running outside the shared Docker network). Fall back to the
+        // submitted values on any failure instead of crashing the create.
+        var dto = new CreateUpdateProductDto
         {
-            var randomized = await response.Content.ReadFromJsonAsync<CreateUpdateProductDto>();
-            dto.Name = randomized!.Name;
-            dto.Quantity = randomized!.Quantity;
-            dto.Price = (decimal)randomized!.Price;
-        }
-        else
-        {
-            dto.Name = request.Name;
-            dto.Quantity = request.Quantity;
-            dto.Price = (decimal)request.Price;
-        }
+            Name = request.Name,
+            Quantity = request.Quantity,
+            Price = (decimal)request.Price
+        };
 
-        Console.WriteLine($"Randomizer status: {response.StatusCode}");
-        Console.WriteLine($"Randomizer response: {await response.Content.ReadAsStringAsync()}");
+        try
+        {
+            var response = await client.PostAsync("api/Random/random-price", content);
+            Console.WriteLine($"Randomizer status: {response.StatusCode}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var randomized = await response.Content.ReadFromJsonAsync<CreateUpdateProductDto>();
+                if (randomized is not null)
+                {
+                    dto.Name = randomized.Name;
+                    dto.Quantity = randomized.Quantity;
+                    dto.Price = (decimal)randomized.Price;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Randomizer unavailable, using submitted values: {ex.Message}");
+        }
 
         var product = await productService.CreateProductAsync(dto);
 
@@ -91,7 +104,8 @@ public class ProductGrpcService(IProductService productService, IProductReposito
             Id = product.Id.ToString(),
             Name = product.Name,
             Quantity = product.Quantity,
-            Price = (double)product.Price
+            Price = (double)product.Price,
+            StatusColor = product.StatusColor
         };
     }
 
@@ -118,7 +132,8 @@ public class ProductGrpcService(IProductService productService, IProductReposito
             Id = product.Id.ToString(),
             Name = product.Name,
             Quantity = product.Quantity,
-            Price = (double)product.Price
+            Price = (double)product.Price,
+            StatusColor = product.StatusColor
         };
     }
 

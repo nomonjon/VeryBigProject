@@ -16,6 +16,7 @@ public class ProjectController(IProjectService projectService) : ControllerBase
     public async Task<IActionResult> GetProjects(CancellationToken cancellationToken)
     {
         var projects = await projectService.GetProjectsAsync(cancellationToken);
+        
         return Ok(projects);
     }
 
@@ -31,6 +32,7 @@ public class ProjectController(IProjectService projectService) : ControllerBase
     {
         try
         {
+            var result = await projectService.ValidateProjectAsync(id, cancellationToken);
             var project = await projectService.GetProjectByIdAsync(id, cancellationToken);
             return Ok(project);
         }

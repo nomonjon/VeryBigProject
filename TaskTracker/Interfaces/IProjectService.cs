@@ -5,6 +5,7 @@ namespace TaskTracker.Interfaces;
 
 public interface IProjectService
 {
+
     Task<List<ProjectDto>> GetProjectsAsync(CancellationToken cancellationToken);
     Task<List<ProjectWithIdDto>> GetProjectsWithIdAsync(CancellationToken cancellationToken);
     Task<Result<ProjectDto?>> GetProjectByIdWithTasksAsync(Guid id, CancellationToken cancellationToken);
@@ -14,4 +15,9 @@ public interface IProjectService
     Task<Result<bool>> DeleteProjectAsync(Guid id, CancellationToken cancellationToken);
     Task<Result<bool>> AddUserToProjectAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
     Task<Result<bool>> RemoveUserFromProjectAsync(Guid projectId, Guid userId, CancellationToken cancellationToken);
+    async Task<Result<bool>> ValidateProjectAsync(Guid projectId, CancellationToken cancellationToken)
+    {
+        return Result<bool>.Success(true);
+    }
+    
 }

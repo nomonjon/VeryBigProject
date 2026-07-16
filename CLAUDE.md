@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Project | Type | Role |
 |---|---|---|
-| **GrpcServer** | ASP.NET Core Web | Product catalog exposed via gRPC |
+| **GrpcServer** | ASP.NET Core Web | Product catalog — gRPC (:5000) + REST incl. product rules (:5002) |
 | **TaskTracker** | ASP.NET Core Web | Task/project management — REST + GraphQL |
 | **NotificationService** | Worker Service | Consumes RabbitMQ events, sends notifications |
 | **LogPlatform** | ASP.NET Core Web | Centralized log viewer (MongoDB backend) |
@@ -27,7 +27,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 dotnet build intership.sln
 
 # Run individual backend services
-dotnet run --project GrpcServer        # gRPC :5000
+dotnet run --project GrpcServer        # gRPC :5000, REST :5002
 dotnet run --project TaskTracker       # REST+GraphQL :5100
 dotnet run --project LogPlatform       # Logs API :5080
 dotnet run --project NotificationService

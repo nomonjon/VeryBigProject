@@ -129,6 +129,11 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ProductApiService>();
 
+// ProductRule REST API lives on GrpcServer (:5002), not over gRPC.
+builder.Services.AddHttpClient<ProductRuleApiService>(client =>
+    client.BaseAddress = new Uri(
+        builder.Configuration["Services:ProductRuleApi"] ?? "http://product:5002/"));
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddHttpContextAccessor();

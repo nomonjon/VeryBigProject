@@ -4,6 +4,7 @@ using GrpcServer.Interfaces;
 using GrpcServer.Models;
 using GrpcServer.Repository;
 using GrpcServer.Services;
+using GrpcServer.Workers;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -35,6 +36,9 @@ builder.Host.UseSerilog((ctx, _, config) =>
 // ── Services ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductRuleRepository, ProductRuleRepository>();
+builder.Services.AddScoped<IProductRuleService, ProductRuleService>();
+builder.Services.AddHostedService<ProductRuleWorker>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -46,12 +50,15 @@ builder.Services.AddHttpClient("PriceRandomizer", client =>
 
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
 app.MapGrpcService<ProductGrpcService>();
 if (app.Environment.IsDevelopment())
     app.MapGrpcReflectionService();
+
+app.MapControllers();
 
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client.");
 

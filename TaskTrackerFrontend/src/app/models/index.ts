@@ -120,14 +120,33 @@ export interface CreateUpdateWorkTaskDto {
 export interface ProductDto {
   id: string;
   name: string;
-  description: string;
+  quantity: number;
   price: number;
+  // Worst matching rule's color: 'green' (normal), 'orange' (warning), 'red' (critical).
+  statusColor: string;
 }
 
 export interface CreateUpdateProductDto {
   name: string;
-  description: string;
+  quantity: number;
   price: number;
+}
+
+// ── Product Rule ──────────────────────────────────────────────────────────────
+export interface ProductRuleDto {
+  id: string;
+  name: string;
+  expression: string;
+  color: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateUpdateProductRuleDto {
+  name: string;
+  expression: string;
+  color: string;
+  isActive: boolean;
 }
 
 // ── Error ─────────────────────────────────────────────────────────────────────

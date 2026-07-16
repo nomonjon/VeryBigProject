@@ -11,7 +11,6 @@ services:
       context: .
       dockerfile: GrpcServer/Dockerfile
     environment:
-      - ASPNETCORE_HTTP_PORTS=5000
       - ASPNETCORE_ENVIRONMENT=Development
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
@@ -19,6 +18,7 @@ services:
       - RabbitMQ__Password=guest
     ports:
       - "5000:5000"
+      - "5002:5002"
     depends_on:
       rabbitmq:
         condition: service_healthy

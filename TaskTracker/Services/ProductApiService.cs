@@ -13,7 +13,8 @@ public class ProductApiService(ProductService.ProductServiceClient client)
             Id = Guid.Parse(p.Id),
             Name = p.Name,
             Quantity = p.Quantity,
-            Price = (decimal)p.Price
+            Price = (decimal)p.Price,
+            StatusColor = p.StatusColor
         }).ToList();
     }
 
@@ -26,7 +27,8 @@ public class ProductApiService(ProductService.ProductServiceClient client)
             Id = Guid.Parse(response.Id),
             Name = response.Name,
             Quantity = response.Quantity,
-            Price = (decimal)response.Price
+            Price = (decimal)response.Price,
+            StatusColor = response.StatusColor
         };
 
     }
@@ -45,7 +47,8 @@ public class ProductApiService(ProductService.ProductServiceClient client)
             Id = Guid.Parse(response.Id),
             Name = response.Name,
             Quantity = response.Quantity,
-            Price = (decimal)response.Price
+            Price = (decimal)response.Price,
+            StatusColor = response.StatusColor
         };
     }
 
@@ -65,7 +68,8 @@ public class ProductApiService(ProductService.ProductServiceClient client)
             Id = Guid.Parse(response.Id),
             Name = response.Name,
             Quantity = response.Quantity,
-            Price = (decimal)response.Price
+            Price = (decimal)response.Price,
+            StatusColor = response.StatusColor
         };
 
     }
@@ -90,4 +94,5 @@ public class ProductDto
     public string Name { get; set; }
     public double Quantity { get; set; }
     public decimal Price { get; set; }
+    public string StatusColor { get; set; } = null!;
 }

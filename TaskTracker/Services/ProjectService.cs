@@ -1,3 +1,4 @@
+using Google.Protobuf.Compiler;
 using TaskTracker.Dtos;
 using TaskTracker.Interfaces;
 using TaskTracker.Mappers;
@@ -165,6 +166,12 @@ public class ProjectService(
         project.Users.Remove(user);
         await projectRepo.Update(project, cancellationToken);
         logger.LogInformation("User {UserId} removed from project {ProjectId}", userId, projectId);
+        return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<bool>> ValidateProjectAsync(Guid id, CancellationToken cancellationToken)
+    {
+        
         return Result<bool>.Success(true);
     }
 }

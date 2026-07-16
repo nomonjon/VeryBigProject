@@ -9,6 +9,8 @@ public record ProductDto
     public double Quantity { get; set; }
 
     public decimal Price { get; set; }
+
+    public string StatusColor { get; set; } = null!;
 }
 
 public record CreateUpdateProductDto

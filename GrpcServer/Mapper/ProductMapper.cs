@@ -33,7 +33,8 @@ public static class ProductMapper
             Id = product.Id,
             Name = product.Name,
             Quantity = product.Quantity,
-            Price = product.Price
+            Price = product.Price,
+            StatusColor = product.StatusColor
         };
     }
 }

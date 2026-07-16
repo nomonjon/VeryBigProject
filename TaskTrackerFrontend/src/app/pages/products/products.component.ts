@@ -3,7 +3,8 @@ import { CurrencyPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { ProductService } from '../../services/product.service';
-import { ProductDto, CreateUpdateProductDto } from '../../models';
+import { RuleService } from '../../services/rule.service';
+import { ProductDto, CreateUpdateProductDto, ProductRuleDto, CreateUpdateProductRuleDto } from '../../models';
 
 @Component({
   selector: 'app-products',
@@ -15,6 +16,7 @@ import { ProductDto, CreateUpdateProductDto } from '../../models';
 export class ProductsComponent implements OnInit {
 
   private svc = inject(ProductService);
+  private ruleSvc = inject(RuleService);
   private fb  = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
 
@@ -25,13 +27,29 @@ export class ProductsComponent implements OnInit {
   submitting = false;
   error = '';
 
+  // ── Rules ──
+  rules: ProductRuleDto[] = [];
+  rulesLoading = true;
+  showRuleModal = false;
+  ruleSubmitting = false;
+  ruleError = '';
+
   form = this.fb.group({
-    name:        ['', Validators.required],
-    description: ['', Validators.required],
-    price:       [0, [Validators.required, Validators.min(0)]],
+    name:     ['', Validators.required],
+    quantity: [0, [Validators.required, Validators.min(0)]],
+    price:    [0, [Validators.required, Validators.min(0)]],
   });
 
-  ngOnInit() { this.load(); }
+  ruleForm = this.fb.group({
+    name:       ['', Validators.required],
+    expression: ['', Validators.required],
+    color:      ['orange', Validators.required],
+  });
+
+  ngOnInit() {
+    this.load();
+    this.loadRules();
+  }
 
   load() {
     this.loading = true;
@@ -54,16 +72,31 @@ export class ProductsComponent implements OnInit {
 
   openCreate() {
     this.editingId = null;
-    this.form.reset({ price: 0 });
+    this.form.reset({ quantity: 0, price: 0 });
     this.error = '';
     this.showModal = true;
   }
 
   openEdit(p: ProductDto) {
     this.editingId = p.id;
-    this.form.patchValue({ name: p.name, description: p.description, price: p.price });
+    this.form.patchValue({ name: p.name, quantity: p.quantity, price: p.price });
     this.error = '';
     this.showModal = true;
+  }
+
+  // Inline quick stock adjust from the product row (no modal). Sends the whole
+  // product because the update endpoint replaces name/quantity/price.
+  adjustQty(p: ProductDto, delta: number) {
+    const quantity = Math.max(0, p.quantity + delta);
+    if (quantity === p.quantity) return;
+    const dto: CreateUpdateProductDto = { name: p.name, quantity, price: p.price };
+    this.svc.update(p.id, dto).subscribe({
+      next: () => this.load(),
+      error: (err) => {
+        console.error('Quantity update error', err);
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   closeModal() {
@@ -92,11 +125,90 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  // Human label for a product's rule-driven color.
+  statusLabel(color: string): string {
+    switch (color) {
+      case 'red':    return 'Out of stock';
+      case 'orange': return 'Low stock';
+      default:       return 'In stock';
+    }
+  }
+
   delete(id: string) {
     if (!confirm('Delete this product?')) return;
     this.svc.delete(id).subscribe({
       next: () => this.load()
       // no markForCheck needed here since load() handles it
+    });
+  }
+
+  // ── Rules ──────────────────────────────────────────────────────────────────
+
+  loadRules() {
+    this.rulesLoading = true;
+    this.ruleSvc.getAll().pipe(
+      finalize(() => {
+        this.rulesLoading = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: (r) => {
+        this.rules = r;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Rules load error', err);
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  openCreateRule() {
+    this.ruleForm.reset({ name: '', expression: '', color: 'orange' });
+    this.ruleError = '';
+    this.showRuleModal = true;
+  }
+
+  closeRuleModal() {
+    this.showRuleModal = false;
+  }
+
+  submitRule() {
+    if (this.ruleForm.invalid) return;
+    this.ruleSubmitting = true;
+    const dto: CreateUpdateProductRuleDto = {
+      name: this.ruleForm.value.name!,
+      expression: this.ruleForm.value.expression!,
+      color: this.ruleForm.value.color!,
+      isActive: true,
+    };
+    this.ruleSvc.create(dto).pipe(
+      finalize(() => {
+        this.ruleSubmitting = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: () => {
+        this.showRuleModal = false;
+        this.loadRules();
+        // Products get re-colored by the server sweep (~15s); refresh to show it.
+        this.load();
+      },
+      error: (err) => {
+        this.ruleError = (typeof err.error === 'string' ? err.error : err.error?.message)
+          || 'Invalid rule expression';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  deleteRule(id: string) {
+    if (!confirm('Delete this rule?')) return;
+    this.ruleSvc.delete(id).subscribe({
+      next: () => {
+        this.loadRules();
+        this.load();
+      },
     });
   }
 }
