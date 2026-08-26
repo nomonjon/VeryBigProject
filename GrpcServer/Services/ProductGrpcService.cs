@@ -9,13 +9,15 @@ using System.Xml.Linq;
 
 namespace GrpcServer.Services;
 
-public class ProductGrpcService(IProductService productService, IProductRepository productRepository, IHttpClientFactory httpClientFactory)
+public class ProductGrpcService(IProductService productService, IHttpClientFactory httpClientFactory)
     : ProductService.ProductServiceBase  // <- авто-сгенерировано из .proto
 {
     public override async Task<GetAllResponse> GetAll(
         GetAllRequest request, ServerCallContext context)
     {
-        var products = await productRepository.GetAllAsync();
+        // Route through the cached service so gRPC GetAll shares the same
+        // products:all entry as the REST list instead of hitting the DB directly.
+        var products = await productService.GetAllProductsAsync();
 
         var response = new GetAllResponse();
         response.Products.AddRange(products.Select(p => new ProductResponse

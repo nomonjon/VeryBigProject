@@ -47,7 +47,9 @@ public class RabbitMqPublisher(IConnection connection) : IAsyncDisposable
             arguments: null);
     }
 
-    public async Task PublishAsync(TaskStatusChangedEvent @event)
+    // virtual so WorkTaskService tests can substitute a publisher that records events
+    // instead of opening a channel to a broker. No behaviour change.
+    public virtual async Task PublishAsync(TaskStatusChangedEvent @event)
     {
         await using var channel = await connection.CreateChannelAsync();
 
@@ -62,7 +64,7 @@ public class RabbitMqPublisher(IConnection connection) : IAsyncDisposable
             body: body);
     }
 
-    public async Task PublishLogAsync(string logJson)
+    public virtual async Task PublishLogAsync(string logJson)
     {
         await using var channel = await connection.CreateChannelAsync();
 

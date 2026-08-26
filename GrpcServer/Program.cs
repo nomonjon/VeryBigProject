@@ -4,6 +4,7 @@ using GrpcServer.Interfaces;
 using GrpcServer.Models;
 using GrpcServer.Repository;
 using GrpcServer.Services;
+using GrpcServer.Services.Caching;
 using GrpcServer.Workers;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -32,6 +33,29 @@ builder.Host.UseSerilog((ctx, _, config) =>
             outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
         .WriteTo.Sink(new RabbitMqLogSink(rmqConnection));
 });
+
+// ── Cache backend (switchable: Redis | Memory | None) ────────────────────────
+// Provider is config-driven so the same build can be benchmarked under each
+// backend without recompiling. Default is Redis to preserve prior behaviour.
+var cacheProvider = builder.Configuration["Cache:Provider"] ?? "Redis";
+switch (cacheProvider.ToLowerInvariant())
+{
+    case "memory":
+        builder.Services.AddMemoryCache();
+        builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
+        break;
+    case "none":
+        builder.Services.AddSingleton<ICacheService, NoCacheService>();
+        break;
+    default: // "redis"
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+            options.InstanceName = "grpcserver:";
+        });
+        builder.Services.AddSingleton<ICacheService, RedisCacheService>();
+        break;
+}
 
 // ── Services ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

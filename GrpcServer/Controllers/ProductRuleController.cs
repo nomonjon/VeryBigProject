@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using GrpcServer.Dtos;
 using GrpcServer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -6,21 +7,29 @@ namespace GrpcServer.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductRuleController(IProductRuleService ruleService) : ControllerBase
+public class ProductRuleController(IProductRuleService ruleService, ILogger<ProductRuleController> logger) : ControllerBase
 {
+    private readonly Stopwatch stopwatch = new();
     [HttpGet]
     public async Task<IActionResult> GetRules()
     {
+        stopwatch.Start();
         var rules = await ruleService.GetAllRulesAsync();
+
+        logger.LogInformation($"GetRules executed in {stopwatch.ElapsedMilliseconds} ms");
+
         return Ok(rules);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetRule(Guid id)
     {
+        stopwatch.Start();
         var rule = await ruleService.GetRuleByIdAsync(id);
         if (rule is null)
             return NotFound();
+
+        logger.LogInformation($"GetRule executed in {stopwatch.ElapsedMilliseconds} ms");
         return Ok(rule);
     }
 
@@ -66,18 +75,23 @@ public class ProductRuleController(IProductRuleService ruleService) : Controller
     [HttpGet("{id:guid}/products")]
     public async Task<IActionResult> GetMatchingProducts(Guid id)
     {
+        stopwatch.Start();
         var products = await ruleService.GetMatchingProductsAsync(id);
         if (products is null)
             return NotFound();
+        logger.LogInformation($"GetMatchingProducts executed in {stopwatch.ElapsedMilliseconds} ms");
         return Ok(products);
     }
 
     [HttpGet("evaluate/{productId:guid}")]
     public async Task<IActionResult> EvaluateProduct(Guid productId)
     {
+        stopwatch.Start();  
         var matches = await ruleService.EvaluateProductAsync(productId);
         if (matches is null)
             return NotFound();
+
+        logger.LogInformation($"EvaluateProduct executed in {stopwatch.ElapsedMilliseconds} ms");
         return Ok(matches);
     }
 }

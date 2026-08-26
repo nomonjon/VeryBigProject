@@ -7,6 +7,15 @@ namespace TaskTracker.Repository;
 
 public class ProjectRepository(AppDbContext context) : BaseRepository<Project>(context), IProjectRepository
 {
+    // BaseRepository.GetAll now hands back an IQueryable so callers can compose on it.
+    // IProjectRepository still promises a materialised list, so shadow it here — same
+    // pattern WorkTaskRepository already uses for its Include-heavy override.
+    public new async Task<List<Project>> GetAll(CancellationToken cancellationToken)
+    {
+        return await context.Projects
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
 
     //public async Task<Project> CreateProject(Project newProject, CancellationToken cancellationToken)
     //{

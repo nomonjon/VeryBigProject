@@ -8,6 +8,16 @@ namespace TaskTracker.Repository;
 
 public class UserRepository(AppDbContext context) : BaseRepository<User>(context), IUserRepository
 {
+    // BaseRepository.GetAll now hands back an IQueryable so callers can compose on it.
+    // IUserRepository still promises a materialised list, so shadow it here — same
+    // pattern WorkTaskRepository already uses for its Include-heavy override.
+    public new async Task<List<User>> GetAll(CancellationToken cancellationToken)
+    {
+        return await context.Users
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     //public async Task<User> CreateUser(User newUser, CancellationToken cancellationToken)
     //{
 

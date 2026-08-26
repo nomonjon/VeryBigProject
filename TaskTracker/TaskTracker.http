@@ -1,6 +1,11 @@
-@TaskTracker_HostAddress = http://localhost:5101
+@url = http://localhost:5100
 
-GET {{TaskTracker_HostAddress}}/weatherforecast/
-Accept: application/json
 
+GET {{url}}/api/Products
 ###
+
+GET {{url}}/api/products/33196282-9075-4bfe-aca9-60d243045325
+###
+GET {{url}}/api/productrule
+###
+GET {{url}}/api/productrule/evaluate/f75e3dac-389c-467b-8a41-8a31b1ec211f

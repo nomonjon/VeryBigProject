@@ -6,15 +6,16 @@ namespace TaskTracker.Repository;
 
 public class BaseRepository<T>(AppDbContext context) where T : BaseEntity
 {
-    public async Task<List<T>> GetAll(CancellationToken cancellationToken)
+    public async Task<IQueryable<T>> GetAll(CancellationToken cancellationToken)
     {
-        return await context.Set<T>().AsNoTracking().ToListAsync(cancellationToken);
+        return context.Set<T>().AsNoTracking();
     }
 
     public async Task<T?> GetById(Guid id, CancellationToken cancellationToken)
     {
         return await context.Set<T>().AsNoTracking().FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
+
 
     public async Task<T?> GetByIdWithTraking(Guid id, CancellationToken cancellationToken)
     {

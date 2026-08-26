@@ -2,13 +2,21 @@ using GrpcServer.Dtos;
 using GrpcServer.Interfaces;
 using GrpcServer.Mapper;
 using GrpcServer.Models;
+using GrpcServer.Services.Caching;
 using System.Linq.Dynamic.Core;
 using static GrpcServer.Validator.RulesValidator;
 
 namespace GrpcServer.ApiServices;
 
-public class ProductRuleService(IProductRuleRepository ruleRepository, IProductRepository productRepository) : IProductRuleService
+public class ProductRuleService(
+    IProductRuleRepository ruleRepository,
+    IProductRepository productRepository,
+    ICacheService cache) : IProductRuleService
 {
+    // Rules are read on every 15s sweep and every evaluate, but only change via
+    // the CRUD methods below — which evict — so the TTL is just a safety net.
+    private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(5);
+
     public async Task<ProductRuleDto> CreateRuleAsync(CreateUpdateProductRuleDto ruleDto)
     {
         ValidateExpression(ruleDto.Expression);
@@ -18,23 +26,34 @@ public class ProductRuleService(IProductRuleRepository ruleRepository, IProductR
         rule.CreatedAt = DateTime.UtcNow;
 
         await ruleRepository.CreateAsync(rule);
+        await InvalidateRuleListsAsync();
         return rule.ToProductRuleDto();
     }
 
     public async Task<ProductRuleDto?> GetRuleByIdAsync(Guid id)
     {
-        var rule = await ruleRepository.GetByIdAsync(id);
-
-        if (rule is null)
-            return null;
-
-        return rule.ToProductRuleDto();
+        return await cache.GetOrSetAsync(
+            CacheKeys.Rule(id),
+            async () =>
+            {
+                var rule = await ruleRepository.GetByIdAsync(id);
+                return rule?.ToProductRuleDto();
+            },
+            Ttl);
     }
 
     public async Task<List<ProductRuleDto>> GetAllRulesAsync()
     {
-        var rules = await ruleRepository.GetAllAsync();
-        return rules.Select(r => r.ToProductRuleDto()).ToList();
+        var rules = await cache.GetOrSetAsync(
+            CacheKeys.RuleList,
+            async () =>
+            {
+                var all = await ruleRepository.GetAllAsync();
+                return all.Select(r => r.ToProductRuleDto()).ToList();
+            },
+            Ttl);
+
+        return rules ?? [];
     }
 
     public async Task<ProductRuleDto?> UpdateRuleAsync(Guid id, CreateUpdateProductRuleDto ruleDto)
@@ -47,12 +66,19 @@ public class ProductRuleService(IProductRuleRepository ruleRepository, IProductR
         if (result is null)
             return null;
 
+        await InvalidateRuleListsAsync(id);
+
         return result.ToProductRuleDto();
     }
 
     public async Task<bool> DeleteRuleAsync(Guid id)
     {
-        return await ruleRepository.DeleteAsync(id);
+        var deleted = await ruleRepository.DeleteAsync(id);
+
+        if (deleted)
+            await InvalidateRuleListsAsync(id);
+
+        return deleted;
     }
 
     public async Task<List<ProductDto>?> GetMatchingProductsAsync(Guid ruleId)
@@ -72,7 +98,7 @@ public class ProductRuleService(IProductRuleRepository ruleRepository, IProductR
         if (product is null)
             return null;
 
-        var rules = await ruleRepository.GetActiveAsync();
+        var rules = await GetActiveRulesAsync();
 
         return rules.Select(rule =>
         {
@@ -94,7 +120,7 @@ public class ProductRuleService(IProductRuleRepository ruleRepository, IProductR
     // of products whose color actually changed.
     public async Task<int> ApplyActiveRulesAsync()
     {
-        var rules = await ruleRepository.GetActiveAsync();
+        var rules = await GetActiveRulesAsync();
         var compiled = rules
             .Select(r => (Matches: ToPredicate(r.Expression).Compile(), r.Color))
             .ToList();
@@ -120,10 +146,30 @@ public class ProductRuleService(IProductRuleRepository ruleRepository, IProductR
 
             product.StatusColor = color;
             await productRepository.UpdateAsync(product);
+            // The sweep writes StatusColor behind ProductService's back, so the
+            // product cache must be evicted here or reads serve the old color.
+            await cache.RemoveAsync(CacheKeys.Product(product.Id));
             changed++;
         }
+
+        if (changed > 0)
+            await cache.RemoveAsync(CacheKeys.ProductList);
 
         return changed;
     }
 
+    private async Task<List<ProductRule>> GetActiveRulesAsync()
+    {
+        var rules = await cache.GetOrSetAsync(
+            CacheKeys.ActiveRuleList,
+            async () => await ruleRepository.GetActiveAsync(),
+            Ttl);
+
+        return rules ?? [];
+    }
+
+    private Task InvalidateRuleListsAsync(Guid? id = null) =>
+        id is null
+            ? cache.RemoveAsync(CacheKeys.RuleList, CacheKeys.ActiveRuleList)
+            : cache.RemoveAsync(CacheKeys.RuleList, CacheKeys.ActiveRuleList, CacheKeys.Rule(id.Value));
 }
